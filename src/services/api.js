@@ -7,8 +7,9 @@ import { USE_MOCK, MOCK_DELAY, DEFAULT_PAGE_SIZE } from '../constants'
 import { request } from './request'
 import { mockPersons, mockDetails, mockActivities } from '../data/mock'
 
-/** 模拟网络延迟 */
+/** 模拟网络延迟（MOCK_DELAY=0 时立即返回，不产生额外等待） */
 function delay(ms = MOCK_DELAY) {
+  if (!ms) return Promise.resolve()
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
@@ -50,18 +51,35 @@ export async function getPersonList(params = {}) {
 
 /**
  * 人员详情（含图片/视频/音频）
+ * 缓存 Promise 本身：并发请求去重（列表页预取与详情页自身请求共享同一个），
+ * 已进入过的详情二次进入秒开；失败不缓存，下次进入自动重试
  * @param {string} id 人员 id
  * @returns {Promise<object>} 详情数据
  *
  * 对接后端示例：return request({ url: `/person/${id}` })
  */
-export async function getPersonDetail(id) {
-  if (!USE_MOCK) {
-    return request({ url: `/person/${id}` })
-  }
+const detailCache = new Map() // id -> Promise（并发/重复请求去重）
+const detailData = new Map() // id -> 已就绪数据（详情页首帧同步直出，避免 loading 闪动）
 
-  await delay()
-  return mockDetails[id] || null
+export async function getPersonDetail(id) {
+  let p = detailCache.get(id)
+  if (!p) {
+    p = (!USE_MOCK
+      ? request({ url: `/person/${id}` })
+      : delay().then(() => mockDetails[id] || null)
+    ).then((data) => {
+      if (data) detailData.set(id, data)
+      return data
+    })
+    detailCache.set(id, p)
+    p.catch(() => detailCache.delete(id))
+  }
+  return p
+}
+
+/** 同步读取已就绪的详情数据；未就绪返回 null（详情页首帧直出用） */
+export function peekPersonDetail(id) {
+  return detailData.get(id) || null
 }
 
 /**

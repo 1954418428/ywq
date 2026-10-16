@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View, Text, Image, Input, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { getPersonList } from '../../services/api'
+import { getPersonList, getPersonDetail } from '../../services/api'
 import './index.scss'
 
 /** H5 用视口高度减 tabbar，RN 用 flex 撑开（RN 不支持 vh 单位） */
@@ -54,6 +54,8 @@ export default function Index() {
   }
 
   const goDetail = (item) => {
+    // 预取详情：请求与路由转场并行，详情页直接命中缓存，避免转场后再白等 loading
+    getPersonDetail(item.id).catch(() => {})
     Taro.navigateTo({ url: `/pages/detail/index?id=${item.id}` })
   }
 

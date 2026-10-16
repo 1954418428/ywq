@@ -9,8 +9,8 @@ export const API_BASE_URL = 'https://api.example.com'
 // 是否使用本地 Mock 数据；后端就绪后置为 false 即切换真实接口
 export const USE_MOCK = true
 
-// Mock 数据模拟延迟（ms），便于观察 loading 状态
-export const MOCK_DELAY = 400
+// Mock 数据模拟延迟（ms），纯前端阶段置 0 不等待；需要观察 loading 状态时可临时调大
+export const MOCK_DELAY = 0
 
 // 媒体资源（图片/视频/音频）地址前缀：
 // 后端返回相对路径（如 /upload/a.jpg）时自动拼接

@@ -23,6 +23,27 @@
       background: #f5f6f8;
       box-shadow: 0 0 32px rgba(31, 41, 61, 0.08);
     }
+    /* Taro 内置导航栏：标题与返回键缩小 */
+    #taro-navigation-bar .taro-navigation-bar-title {
+      font-size: 32px;
+    }
+    #taro-navigation-bar.taro-navigation-bar-back-icon > .taro-navigation-bar-back,
+    #taro-navigation-bar.taro-navigation-bar-home-icon > .taro-navigation-bar-home {
+      width: 32px;
+      height: 32px;
+    }
+    #taro-navigation-bar .taro-navigation-bar-back svg,
+    #taro-navigation-bar .taro-navigation-bar-home svg {
+      width: 32px;
+      height: 32px;
+    }
+    /* Taro Video（H5）：视频根元素自带 taro-video-container 类（position:absolute，脱离文档流），
+       组件自带的 taro-video 包裹层规则（position:relative）匹配不到任何元素，
+       需在此拉回文档流，否则视频悬浮、遮挡下方内容且 .video-item 高度塌陷 */
+    .detail-scroll .video-player {
+      display: block;
+      position: relative;
+    }
   </style>
   <script>
     document.write(
