@@ -1,0 +1,70 @@
+/* 活动页样式（750 设计稿；RN 兼容：仅类选择器） */
+
+.activity-page {
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+
+.activity-list {
+  box-sizing: border-box; /* scroll-view 自带 width:100%，不加 border-box 会加 padding 溢出 */
+  flex: 1;
+  padding: 24px;
+}
+
+/* 活动卡片 */
+.activity-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+.activity-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.activity-title {
+  flex: 1;
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-right: 16px;
+}
+
+.activity-date {
+  font-size: 22px;
+  color: #9ca3af;
+}
+
+.activity-content {
+  margin-top: 12px;
+  font-size: 26px;
+  line-height: 40px;
+  color: #6b7280;
+}
+
+/* 列表底部状态 */
+.activity-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 24px 0 40px;
+}
+
+.footer-text {
+  font-size: 24px;
+  color: #b0b7c3;
+}
+
+/* 中屏/大屏：卡片限宽居中，避免在加宽容器里被拉伸 */
+@media screen and (min-width: 600px) {
+  .activity-card {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

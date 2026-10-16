@@ -1,0 +1,23 @@
+/* 全局样式（跨端：H5 / RN）
+ * 注意：RN 端仅支持类选择器，请勿在此使用标签/ID/后代选择器
+ * H5 外壳样式（html/body/#app 限宽居中）位于 index.html 中
+ */
+
+.app-root {
+  min-height: 100vh;
+  background: #f5f6f8;
+}
+
+/* 通用文本省略 */
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

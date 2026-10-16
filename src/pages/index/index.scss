@@ -1,0 +1,150 @@
+/* 首页样式（750 设计稿；RN 兼容：仅类选择器，媒体查询 RN 端自动忽略） */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  background: #f5f6f8;
+}
+
+.search-wrap {
+  background: #ffffff;
+  padding: 20px 24px;
+}
+
+.search-input {
+  height: 68px;
+  line-height: 68px;
+  background: #f0f2f5;
+  border-radius: 34px;
+  padding: 0 30px;
+  font-size: 26px;
+  color: #1f2937;
+}
+
+.list {
+  box-sizing: border-box; /* scroll-view 自带 width:100%，不加 border-box 会加 padding 溢出 */
+  flex: 1;
+  padding: 24px;
+}
+
+/* 卡片网格布局（CSS Grid）：
+   小屏 2 列（基础样式），中屏 4 列，大屏 6 列（见底部媒体查询） */
+.list-inner {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* 人物卡片（竖排：头像在上） */
+.card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 20px;
+}
+
+.card-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  background: #e5e7eb;
+}
+
+.card-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.card-name {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.badge {
+  margin-left: 12px;
+  padding: 2px 12px;
+  border-radius: 16px;
+  font-size: 18px;
+}
+
+.badge-female {
+  background: #fdeef2;
+  color: #e05f81;
+}
+
+.badge-male {
+  background: #e8f0fe;
+  color: #4a7de0;
+}
+
+.card-age {
+  margin-left: 10px;
+  font-size: 22px;
+  color: #9ca3af;
+}
+
+.card-meta {
+  margin-top: 8px;
+  font-size: 24px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.card-brief {
+  margin-top: 8px;
+  font-size: 22px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.card-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.tag {
+  background: #eef2ff;
+  color: #4f6ef2;
+  font-size: 20px;
+  padding: 4px 14px;
+  border-radius: 18px;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+
+/* 分级网格（RN 端不支持 Grid，忽略媒体查询后卡片单列堆叠）
+   中屏 ≥600px：4 列 */
+@media screen and (min-width: 600px) {
+  .list-inner {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 大屏 ≥1024px：6 列 */
+@media screen and (min-width: 1024px) {
+  .list-inner {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 列表底部状态 */
+.list-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 24px 0 40px;
+}
+
+.footer-text {
+  font-size: 24px;
+  color: #b0b7c3;
+}

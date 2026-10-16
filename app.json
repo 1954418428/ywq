@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "yw-showcase",
+    "slug": "yw-showcase",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "plugins": [],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.ywshowcase"
+    },
+    "android": {
+      "package": "com.example.ywshowcase"
+    }
+  }
+}

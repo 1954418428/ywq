@@ -1,0 +1,54 @@
+/* 音频播放器样式（RN 兼容：仅类选择器） */
+
+.audio-player {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.audio-toggle {
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background: #4f6ef2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.audio-toggle-icon {
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.audio-body {
+  flex: 1;
+  margin-left: 20px;
+}
+
+.audio-title {
+  font-size: 26px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.audio-progress-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.audio-slider {
+  flex: 1;
+}
+
+.audio-time {
+  margin-left: 12px;
+  font-size: 20px;
+  color: #9ca3af;
+}
