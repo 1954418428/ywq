@@ -3,15 +3,15 @@ export default {
   pages: ['pages/index/index', 'pages/activity/index', 'pages/detail/index'],
   tabBar: {
     color: '#7f8c9b',
-    selectedColor: '#4f6ef2',
+    selectedColor: '#d4237a',
     backgroundColor: '#ffffff',
     borderStyle: 'black',
     list: [
       {
         pagePath: 'pages/index/index',
         text: '首页',
-        iconPath: './assets/tabbar/home.png',
-        selectedIconPath: './assets/tabbar/home-active.png'
+        iconPath: './assets/tabbar/home-active.png',
+        selectedIconPath: './assets/tabbar/home.png'
       },
       {
         pagePath: 'pages/activity/index',
