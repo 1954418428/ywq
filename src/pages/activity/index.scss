@@ -3,13 +3,19 @@
 .activity-page {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
   background: #f5f6f8;
 }
 
 .activity-list {
   box-sizing: border-box; /* scroll-view 自带 width:100%，不加 border-box 会加 padding 溢出 */
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 24px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 活动卡片 */

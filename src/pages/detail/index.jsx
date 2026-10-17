@@ -18,12 +18,7 @@ export default function Detail() {
   const [showSiteContact, setShowSiteContact] = useState(false)
   const [showQuickContact, setShowQuickContact] = useState(false)
 
-  /** H5：100vh 减去内置导航栏高度（8+24+8=40px 及刘海安全区），RN 用 flex 撑开（RN 不支持 vh 单位） */
-  const pageStyle = process.env.TARO_ENV === 'h5'
-    ? { height: 'calc(100vh - 40px - env(safe-area-inset-top, 0px))' }
-    : {}
-
-  useEffect(() => {
+    useEffect(() => {
     // 首帧已直出缓存数据，无需再请求；未命中（直接输入 URL 进入）才走 loading
     if (peekPersonDetail(params.id)) return
     setLoading(true)
@@ -136,7 +131,7 @@ export default function Detail() {
   }
 
   return (
-    <View className="detail-page" style={pageStyle}>
+    <View className="detail-page">
       <ScrollView scrollY className="detail-scroll">
         <View className="section media-section">
           <View className="media-tabs">

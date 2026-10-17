@@ -4,11 +4,6 @@ import Taro from '@tarojs/taro'
 import { getActivityList } from '../../services/api'
 import './index.scss'
 
-/** H5 用视口高度减 tabbar，RN 用 flex 撑开（RN 不支持 vh 单位） */
-const pageStyle = process.env.TARO_ENV === 'h5'
-  ? { height: 'calc(100vh - var(--taro-tabbar-height, 52px))' }
-  : {}
-
 export default function Activity() {
   const [list, setList] = useState([])
   const [page, setPage] = useState(1)
@@ -51,7 +46,7 @@ export default function Activity() {
   }
 
   return (
-    <View className="activity-page" style={pageStyle}>
+    <View className="activity-page">
       <ScrollView
         className="activity-list"
         scrollY

@@ -6,11 +6,6 @@ import { getPersonList, getPersonDetail } from '../../services/api'
 import SelectionModal from '../../components/SelectionModal'
 import './index.scss'
 
-/** H5 用视口高度减 tabbar，RN 用 flex 撑开（RN 不支持 vh 单位） */
-const pageStyle = process.env.TARO_ENV === 'h5'
-  ? { height: 'calc(100vh - var(--taro-tabbar-height, 52px))' }
-  : {}
-
 const PROVINCE_OPTIONS = [
   { provinceId: null, province: '全部' },
   ...PROVINCE_CAPITALS.filter((item) => item.capital === '上海市'),
@@ -78,7 +73,7 @@ export default function Index() {
   }
 
   return (
-    <View className="page" style={pageStyle}>
+    <View className="page">
       <View className="search-wrap">
         <Input
           className="search-input"
