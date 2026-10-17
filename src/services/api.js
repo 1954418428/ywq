@@ -5,7 +5,7 @@
 import { DEFAULT_PAGE_SIZE } from '../constants'
 import Taro from '@tarojs/taro'
 
-const REMOTE_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi9wZXJzb25zLmpzb24iLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkyMjM5MDU0LCJleHAiOjE4ODY4NDcwNTR9.hkrsAGvYzLL3rRtq52c0Mb6V251uj5iwDHEBPtV9SJOUcOt2yXANvwUfFQBgrh6bSEVTxG6pwEXQWnd-lUF9OA'
+const REMOTE_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi95eXEuanNvbiIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTIyNDYxNjIsImV4cCI6MTgyMzc4MjE2Mn0.cN-K0b7TLtl0y9Gm7vvOpXNowNQuP6_jqZUXj7XDNGXiHmeHbabFFcwmFdbHdSgtFCDja7MWZxxZxuiIxlHcRg'
 
 const DATA_CACHE_KEY = 'yyq-data-cache'
 const DATA_CACHE_TTL = 24 * 60 * 60 * 1000
