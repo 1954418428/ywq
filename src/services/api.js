@@ -1,17 +1,9 @@
 /**
- * 接口定义（预留后端入口）
- * 当前 USE_MOCK=true 时走本地 Mock；后端就绪后将 constants 中 USE_MOCK 置为 false，
- * 并按下方注释的路径与后端约定对齐即可，页面代码无需改动
+ * 本地数据服务（纯前端版本）
+ * 直接使用 Mock 数据，无需网络请求
  */
-import { USE_MOCK, MOCK_DELAY, DEFAULT_PAGE_SIZE } from '../constants'
-import { request } from './request'
+import { DEFAULT_PAGE_SIZE } from '../constants'
 import { mockPersons, mockDetails, mockActivities } from '../data/mock'
-
-/** 模拟网络延迟（MOCK_DELAY=0 时立即返回，不产生额外等待） */
-function delay(ms = MOCK_DELAY) {
-  if (!ms) return Promise.resolve()
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 /**
  * 人员列表
@@ -27,11 +19,6 @@ export async function getPersonList(params = {}) {
   const page = Math.max(1, Number(params.page) || 1)
   const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE
 
-  if (!USE_MOCK) {
-    return request({ url: '/person/list', data: { ...params, page, pageSize } })
-  }
-
-  await delay()
   const keyword = (params.keyword || '').trim()
   const filtered = keyword
     ? mockPersons.filter(
@@ -64,10 +51,7 @@ const detailData = new Map() // id -> 已就绪数据（详情页首帧同步直
 export async function getPersonDetail(id) {
   let p = detailCache.get(id)
   if (!p) {
-    p = (!USE_MOCK
-      ? request({ url: `/person/${id}` })
-      : delay().then(() => mockDetails[id] || null)
-    ).then((data) => {
+    p = Promise.resolve(mockDetails[id] || null).then((data) => {
       if (data) detailData.set(id, data)
       return data
     })
@@ -95,11 +79,6 @@ export async function getActivityList(params = {}) {
   const page = Math.max(1, Number(params.page) || 1)
   const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE
 
-  if (!USE_MOCK) {
-    return request({ url: '/activity/list', data: { ...params, page, pageSize } })
-  }
-
-  await delay()
   const start = (page - 1) * pageSize
   const list = mockActivities.slice(start, start + pageSize)
   return {

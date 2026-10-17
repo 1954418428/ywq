@@ -1,14 +1,11 @@
 /** 公共工具函数 */
-import { RESOURCE_BASE_URL } from '../constants'
 
 /**
- * 拼接媒体资源完整地址
- * 后端返回相对路径时自动加上 RESOURCE_BASE_URL，返回完整地址时原样使用
+ * 获取媒体资源地址
+ * 纯前端版本直接返回原始 URL
  */
 export function resolveResourceUrl(url) {
-  if (!url) return ''
-  if (/^https?:\/\//.test(url)) return url
-  return RESOURCE_BASE_URL + url
+  return url || ''
 }
 
 /** 秒 -> mm:ss */
