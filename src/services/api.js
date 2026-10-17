@@ -5,7 +5,7 @@
 import { DEFAULT_PAGE_SIZE } from '../constants'
 import Taro from '@tarojs/taro'
 
-const REMOTE_PERSONS_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/persons.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi9wZXJzb25zLmpzb24iLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkyMjM5MDU0LCJleHAiOjE4ODY4NDcwNTR9.hkrsAGvYzLL3rRtq52c0Mb6V251uj5iwDHEBPtV9SJOUcOt2yXANvwUfFQBgrh6bSEVTxG6pwEXQWnd-lUF9OA'
+const REMOTE_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi9wZXJzb25zLmpzb24iLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzkyMjM5MDU0LCJleHAiOjE4ODY4NDcwNTR9.hkrsAGvYzLL3rRtq52c0Mb6V251uj5iwDHEBPtV9SJOUcOt2yXANvwUfFQBgrh6bSEVTxG6pwEXQWnd-lUF9OA'
 
 const DATA_CACHE_KEY = 'yyq-data-cache'
 const DATA_CACHE_TTL = 24 * 60 * 60 * 1000
@@ -80,7 +80,7 @@ function getData() {
 
   dataFetchedAt = 0
   dataPromise = Taro.request({
-    url: `${REMOTE_PERSONS_URL}&cacheBust=${now}`,
+    url: `${REMOTE_DATA_URL}&cacheBust=${now}`,
     method: 'GET',
     dataType: 'json',
     header: {

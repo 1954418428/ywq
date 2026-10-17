@@ -22,7 +22,7 @@ const config = {
     }
   },
   h5: {
-    publicPath: '/',
+    publicPath: './',
     staticDirectory: 'static',
     outputRoot: 'dist',
     router: {
