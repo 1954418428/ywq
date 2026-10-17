@@ -1,6 +1,6 @@
 /* 应用入口页 */
 export default {
-  pages: ['pages/index/index', 'pages/activity/index', 'pages/detail/index'],
+  pages: ['pages/index/index', 'pages/activity/index', 'pages/detail/index', 'pages/user-form/index'],
   tabBar: {
     color: '#7f8c9b',
     selectedColor: '#d4237a',

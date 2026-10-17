@@ -1,13 +1,24 @@
 import { useCallback, useEffect, useState } from 'react'
-import { View, Text, Image, Input, ScrollView } from '@tarojs/components'
+import { View, Text, Image, Input, ScrollView, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import { PROVINCE_CAPITALS } from '../../constants'
 import { getPersonList, getPersonDetail } from '../../services/api'
+import SelectionModal from '../../components/SelectionModal'
 import './index.scss'
 
 /** H5 用视口高度减 tabbar，RN 用 flex 撑开（RN 不支持 vh 单位） */
 const pageStyle = process.env.TARO_ENV === 'h5'
   ? { height: 'calc(100vh - var(--taro-tabbar-height, 52px))' }
   : {}
+
+const PROVINCE_OPTIONS = [
+  { provinceId: null, province: '全部' },
+  ...PROVINCE_CAPITALS.filter((item) => item.capital === '上海市'),
+  ...PROVINCE_CAPITALS.filter((item) => item.capital !== '上海市')
+].map(({ provinceId, province }) => ({
+  value: provinceId,
+  label: province
+}))
 
 export default function Index() {
   const [list, setList] = useState([])
@@ -16,12 +27,19 @@ export default function Index() {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [keyword, setKeyword] = useState('')
+  const [provinceId, setProvinceId] = useState(null)
+  const [showCapitalPicker, setShowCapitalPicker] = useState(false)
+  const selectedProvince = PROVINCE_OPTIONS.find((item) => item.value === provinceId)?.label || '全部'
 
   const load = useCallback(
-    async (pageNum = 1, kw = keyword, mode = 'reset') => {
+    async (pageNum = 1, kw = keyword, mode = 'reset', selectedProvinceId = provinceId) => {
       setLoading(true)
       try {
-        const res = await getPersonList({ page: pageNum, keyword: kw })
+        const res = await getPersonList({
+          page: pageNum,
+          keyword: kw,
+          provinceId: selectedProvinceId
+        })
         setList((prev) => (mode === 'append' ? [...prev, ...res.list] : res.list))
         setHasMore(!!res.hasMore)
         setPage(pageNum)
@@ -31,26 +49,26 @@ export default function Index() {
         setLoading(false)
       }
     },
-    [keyword]
+    [keyword, provinceId]
   )
 
-  // 关键词变化后防抖搜索
+  // 关键词或省会筛选变化后重新获取列表
   useEffect(() => {
-    const timer = setTimeout(() => load(1, keyword, 'reset'), 300)
+    const timer = setTimeout(() => load(1, keyword, 'reset', provinceId), 300)
     return () => clearTimeout(timer)
-  }, [keyword, load])
+  }, [keyword, provinceId, load])
 
   /** 下拉刷新（ScrollView refresher，H5/RN 通用） */
   const onRefresh = async () => {
     setRefreshing(true)
-    await load(1, keyword, 'reset')
+    await load(1, keyword, 'reset', provinceId)
     setRefreshing(false)
   }
 
   /** 上拉加载更多 */
   const onLoadMore = () => {
     if (loading || !hasMore) return
-    load(page + 1, keyword, 'append')
+    load(page + 1, keyword, 'append', provinceId)
   }
 
   const goDetail = (item) => {
@@ -65,11 +83,29 @@ export default function Index() {
         <Input
           className="search-input"
           type="text"
-          placeholder="搜索姓名或职业"
+          maxlength={20}
+          placeholder="搜索昵称"
           value={keyword}
-          onInput={(e) => setKeyword(e.detail.value)}
+          onInput={(e) =>
+            setKeyword(Array.from(e.detail.value).slice(0, 20).join(''))
+          }
         />
       </View>
+      <View className="capital-filter">
+        <Text className="capital-filter-title">省份</Text>
+        <View className="capital-picker-trigger" onClick={() => setShowCapitalPicker(true)}>
+          <Text className="capital-picker-value">{selectedProvince}</Text>
+          <View className="capital-picker-arrow" />
+        </View>
+      </View>
+      <SelectionModal
+        visible={showCapitalPicker}
+        title="选择省份"
+        options={PROVINCE_OPTIONS}
+        value={provinceId}
+        onSelect={setProvinceId}
+        onClose={() => setShowCapitalPicker(false)}
+      />
       <ScrollView
         className="list"
         scrollY
@@ -80,32 +116,22 @@ export default function Index() {
       >
         <View className="list-inner">
           {list.map((item) => (
-            <View key={item.id} className="card" onClick={() => goDetail(item)}>
+            <View key={item.id} className="card">
               <Image className="card-avatar" src={item.avatar} mode="aspectFill" />
               <View className="card-top">
-                <Text className="card-name">{item.name}</Text>
-                <Text
-                  className={
-                    item.gender === '女' ? 'badge badge-female' : 'badge badge-male'
-                  }
-                >
-                  {item.gender}
-                </Text>
-                <Text className="card-age">{item.age}岁</Text>
+                <Text className="card-name">{item.nickname}</Text>
+                <Text className="card-city">{item.province}</Text>
               </View>
-              <Text className="card-meta" numberOfLines={1}>
-                {item.occupation} · {item.city}
-              </Text>
               <Text className="card-brief" numberOfLines={1}>
-                {item.brief}
+                {item.age}岁 · {item.height} cm · {item.weight} kg
               </Text>
-              <View className="card-tags">
-                {item.tags.map((t) => (
-                  <Text key={t} className="tag">
-                    {t}
-                  </Text>
-                ))}
-              </View>
+              <Button
+                className="card-detail-button"
+                size="mini"
+                onClick={() => goDetail(item)}
+              >
+                详细数据
+              </Button>
             </View>
           ))}
         </View>

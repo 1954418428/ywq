@@ -1,260 +1,129 @@
 /**
- * 本地 Mock 数据
- * 字段结构即"后端接口约定"：对接后端后保持一致即可无缝切换
- *
- * 图片样例：picsum.photos 随机图
- * 视频样例：Google 公开示例视频
- * 音频样例：SoundHelix 公开示例音频
+ * 本地 Mock 数据，人员字段按 src/model/user.ts 的 PersonDetail 结构生成。
  */
+import { PHOTO_TYPES, PROVINCE_CAPITALS } from '../constants'
+import { PersonModel } from '../model/user'
 
 const IMG = (seed, w = 600, h = 400) =>
   `https://picsum.photos/seed/${seed}/${w}/${h}`
 const AVATAR = (seed) => `https://picsum.photos/seed/${seed}/200/200`
-const VIDEO =
-  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'
-const AUDIO = (name) => `https://www.soundhelix.com/examples/mp3/${name}.mp3`
-
-/** 人员列表（首页数据） */
-export const mockPersons = [
-  {
-    id: 'p001',
-    name: '林晓',
-    gender: '女',
-    age: 26,
-    city: '上海',
-    occupation: '产品经理',
-    avatar: AVATAR('linxiao'),
-    brief: '专注 B 端产品五年，喜欢摄影和徒步。',
-    tags: ['产品', '摄影', '徒步']
-  },
-  {
-    id: 'p002',
-    name: '陈默',
-    gender: '男',
-    age: 31,
-    city: '深圳',
-    occupation: '前端工程师',
-    avatar: AVATAR('chenmo'),
-    brief: 'React / Vue 双修，热爱开源与机械键盘。',
-    tags: ['前端', '开源', '键盘']
-  },
-  {
-    id: 'p003',
-    name: '苏晴',
-    gender: '女',
-    age: 24,
-    city: '杭州',
-    occupation: '视觉设计师',
-    avatar: AVATAR('suqing'),
-    brief: '插画爱好者，作品多次参展。',
-    tags: ['设计', '插画', '看展']
-  },
-  {
-    id: 'p004',
-    name: '周远',
-    gender: '男',
-    age: 35,
-    city: '北京',
-    occupation: '后端架构师',
-    avatar: AVATAR('zhouyuan'),
-    brief: '高并发系统设计，马拉松跑者。',
-    tags: ['架构', '马拉松', '读书']
-  },
-  {
-    id: 'p005',
-    name: '何雨',
-    gender: '女',
-    age: 28,
-    city: '成都',
-    occupation: '运营策划',
-    avatar: AVATAR('heyu'),
-    brief: '内容运营五年，火锅十级爱好者。',
-    tags: ['运营', '写作', '美食']
-  },
-  {
-    id: 'p006',
-    name: '吴迪',
-    gender: '男',
-    age: 22,
-    city: '广州',
-    occupation: '在校研究生',
-    avatar: AVATAR('wudi'),
-    brief: '人机交互方向，独立游戏开发者。',
-    tags: ['HCI', '游戏', 'Unity']
-  },
-  {
-    id: 'p007',
-    name: '郑冉',
-    gender: '女',
-    age: 30,
-    city: '南京',
-    occupation: '数据分析师',
-    avatar: AVATAR('zhengran'),
-    brief: '用数据讲故事，业余长跑与烘焙。',
-    tags: ['数据', '长跑', '烘焙']
-  },
-  {
-    id: 'p008',
-    name: '王砚',
-    gender: '男',
-    age: 27,
-    city: '武汉',
-    occupation: '测试工程师',
-    avatar: AVATAR('wangyan'),
-    brief: '自动化测试专家，桌游收藏书友。',
-    tags: ['测试', '自动化', '桌游']
-  },
-  {
-    id: 'p009',
-    name: '李潇',
-    gender: '女',
-    age: 29,
-    city: '西安',
-    occupation: '市场经理',
-    avatar: AVATAR('lixiao'),
-    brief: '品牌市场五年，古筝十级。',
-    tags: ['市场', '古筝', '旅行']
-  },
-  {
-    id: 'p010',
-    name: '张阔',
-    gender: '男',
-    age: 33,
-    city: '苏州',
-    occupation: '运维工程师',
-    avatar: AVATAR('zhangkuo'),
-    brief: '云原生与稳定性建设，钓鱼发烧友。',
-    tags: ['运维', 'K8s', '钓鱼']
-  },
-  {
-    id: 'p011',
-    name: '刘念',
-    gender: '女',
-    age: 25,
-    city: '长沙',
-    occupation: '新媒体编辑',
-    avatar: AVATAR('liunian'),
-    brief: '短视频策划与剪辑，播客主播。',
-    tags: ['新媒体', '剪辑', '播客']
-  },
-  {
-    id: 'p012',
-    name: '赵屹',
-    gender: '男',
-    age: 38,
-    city: '厦门',
-    occupation: '技术总监',
-    avatar: AVATAR('zhaoyi'),
-    brief: '团队管理与技术选型，潜水教练。',
-    tags: ['管理', '潜水', '技术']
-  }
+const VIDEO_SOURCES = [
+  'https://download.samplelib.com/mp4/sample-5s.mp4',
+  'https://samplelib.com/vertical/sample-vertical-5s.mp4'
 ]
 
-/** 人员详情（key 为人员 id，含图片/视频/音频媒体） */
-export const mockDetails = {
-  p001: {
-    ...personBrief('p001', '从 0 到 1 搭建 B 端产品矩阵，主导三款 SaaS 产品设计。'),
-    photos: [IMG('p001-1'), IMG('p001-2'), IMG('p001-3')],
-    videos: [
-      {
-        id: 'p001-v1',
-        title: '产品评审现场片段',
-        poster: IMG('p001-v1', 600, 340),
-        url: VIDEO,
-        duration: 15
-      }
-    ],
-    audios: [
-      {
-        id: 'p001-a1',
-        title: '播客：聊聊产品思维',
-        url: AUDIO('SoundHelix-1'),
-        duration: 372
-      },
-      {
-        id: 'p001-a2',
-        title: '音频：产品复盘节选',
-        url: AUDIO('SoundHelix-2'),
-        duration: 325
-      }
-    ]
-  },
-  p002: {
-    ...personBrief('p002', '开源组件库维护者，社区演讲常客。'),
-    photos: [IMG('p002-1'), IMG('p002-2'), IMG('p002-3')],
-    videos: [
-      {
-        id: 'p002-v1',
-        title: '技术分享：React 性能优化',
-        poster: IMG('p002-v1', 600, 340),
-        url: VIDEO,
-        duration: 15
-      }
-    ],
-    audios: [
-      {
-        id: 'p002-a1',
-        title: '播客：前端工程化漫谈',
-        url: AUDIO('SoundHelix-3'),
-        duration: 418
-      }
-    ]
-  },
-  p003: {
-    ...personBrief('p003', '个人插画展「城市呼吸」主理人。'),
-    photos: [IMG('p003-1'), IMG('p003-2'), IMG('p003-3')],
-    videos: [
-      {
-        id: 'p003-v1',
-        title: '创作过程延时记录',
-        poster: IMG('p003-v1', 600, 340),
-        url: VIDEO,
-        duration: 15
-      }
-    ],
-    audios: [
-      {
-        id: 'p003-a1',
-        title: '音频：灵感来源自述',
-        url: AUDIO('SoundHelix-4'),
-        duration: 289
-      }
-    ]
-  }
-}
+const personSeeds = [
+  ['林晓', '女', 26, 110000, '产品经理'],
+  ['陈默', '男', 31, 440000, '前端工程师'],
+  ['苏晴', '女', 24, 330000, '视觉设计师'],
+  ['周远', '男', 35, 110000, '后端架构师'],
+  ['何雨', '女', 28, 510000, '运营策划'],
+  ['吴迪', '男', 22, 440000, '在校研究生'],
+  ['郑冉', '女', 30, 320000, '数据分析师'],
+  ['王砚', '男', 27, 420000, '测试工程师'],
+  ['李潇', '女', 29, 610000, '市场经理'],
+  ['张阔', '男', 33, 320000, '运维工程师'],
+  ['刘念', '女', 25, 430000, '新媒体编辑'],
+  ['赵屹', '男', 38, 350000, '技术总监'],
+  ['顾言', '男', 28, 310000, '摄影师'],
+  ['沈宁', '女', 27, 320000, '交互设计师'],
+  ['唐可', '女', 23, 440000, '插画师'],
+  ['许川', '男', 32, 510000, '建筑师'],
+  ['叶青', '女', 29, 330000, '医生'],
+  ['蒋一', '男', 26, 410000, '教师'],
+  ['罗茜', '女', 31, 430000, '律师'],
+  ['邵明', '男', 34, 370000, '金融顾问'],
+  ['方宁', '女', 24, 350000, '品牌策划'],
+  ['韩松', '男', 30, 210000, '软件工程师'],
+  ['程露', '女', 28, 420000, '纪录片导演'],
+  ['魏然', '男', 25, 450000, '游戏开发者'],
+  ['白露', '女', 26, 520000, '舞蹈老师'],
+  ['秦越', '男', 36, 620000, '创业者'],
+  ['夏禾', '女', 22, 530000, '研究生'],
+  ['孟哲', '男', 29, 130000, '机械工程师'],
+  ['姚瑶', '女', 33, 140000, '人力资源经理'],
+  ['邱泽', '男', 27, 150000, '编辑'],
+  ['陶然', '女', 30, 230000, '营养师'],
+  ['傅航', '男', 24, 220000, '动画师'],
+  ['江月', '女', 35, 360000, '建筑设计师'],
+  ['袁野', '男', 28, 370000, '产品运营'],
+  ['莫言', '女', 27, 340000, '心理咨询师'],
+  ['陆沉', '男', 31, 120000, '项目经理'],
+  ['姜禾', '女', 23, 460000, '旅行博主'],
+  ['段林', '男', 37, 500000, '医生'],
+  ['温以', '女', 29, 650000, '翻译'],
+  ['季风', '男', 26, 640000, '摄影爱好者'],
+  ['乔木', '女', 32, 630000, '环境工程师'],
+  ['安澜', '男', 28, 540000, '户外领队'],
+  ['蓝田', '女', 25, 130000, '花艺师'],
+  ['苏禾', '男', 34, 320000, '音乐制作人'],
+  ['陆远', '男', 30, 350000, '供应链经理'],
+  ['宋乔', '女', 24, 410000, '文案编辑'],
+  ['明川', '男', 33, 430000, '体育教练'],
+  ['简宁', '女', 28, 440000, '电商运营'],
+  ['闻溪', '男', 29, 810000, '金融分析师'],
+  ['林海', '女', 27, 820000, '活动策划']
+]
 
-/** 未单独编写详情的人员，生成通用详情 */
-;['p004', 'p005', 'p006', 'p007', 'p008', 'p009', 'p010', 'p011', 'p012'].forEach(
-  (id, i) => {
-    mockDetails[id] = {
-      ...personBrief(id, '个人简介（示例）：热爱生活，专注专业。'),
-      photos: [IMG(`${id}-1`), IMG(`${id}-2`), IMG(`${id}-3`)],
-      videos: [
+/** 人员列表（50 条）；每条均包含完整详情媒体数据。 */
+export const mockPersons = personSeeds.map(
+  ([nickname, gender, age, provinceCode, job], index) => {
+    const id = `p${String(index + 1).padStart(3, '0')}`
+    const province = PROVINCE_CAPITALS.find(
+      (item) => item.provinceId === provinceCode
+    )
+    const createdTime = `2026-${String((index % 9) + 1).padStart(2, '0')}-${String(
+      (index % 27) + 1
+    ).padStart(2, '0')} 10:00:00`
+
+    return PersonModel.createDetail({
+      id,
+      nickname,
+      gender,
+      age,
+      height: 158 + ((index * 7) % 31),
+      weight: 48 + ((index * 3) % 28),
+      cupSize: 'C',
+      shoeSize: 35 + (index % 8),
+      province: province.province,
+      provinceId: province.provinceId,
+      addressDescription: `${province.capital}周边`,
+      avatar: AVATAR(id),
+      xId: 'tb_fzy111',
+      qq: String(100000001 + index),
+      acceptOffline: index % 3 === 0,
+      freeShipping: true,
+      socksFirstOrderMinPrice: 29 + (index % 5) * 10,
+      underwearFirstOrderMinPrice: 39 + (index % 6) * 15,
+      createdTime,
+      updateTime: createdTime,
+      job,
+      photos: PHOTO_TYPES.map(({ type }) => ({
+        type,
+        src: IMG(`${id}-photo-${type}`)
+      })),
+      videos: VIDEO_SOURCES.map((src, videoIndex) => ({
+        src,
+        sort: videoIndex + 1
+      })),
+      reviewLinks: [
         {
-          id: `${id}-v1`,
-          title: '个人介绍视频',
-          poster: IMG(`${id}-v1`, 600, 340),
-          url: VIDEO,
-          duration: 15
-        }
-      ],
-      audios: [
+          date: createdTime.slice(0, 10),
+          url: 'https://x.com/tb_fzy111'
+        },
         {
-          id: `${id}-a1`,
-          title: '语音自述',
-          url: AUDIO(`SoundHelix-${(i % 8) + 5}`),
-          duration: 300 + i * 7
+          date: `2026-${String(((index + 1) % 9) + 1).padStart(2, '0')}-${String(((index + 7) % 27) + 1).padStart(2, '0')}`,
+          url: 'https://x.com/tb_fzy111'
         }
       ]
-    }
+    })
   }
 )
 
-/** 组装基础信息（复用列表字段，保持接口结构一致） */
-function personBrief(id, detailIntro) {
-  const base = mockPersons.find((p) => p.id === id) || {}
-  return { ...base, id, intro: detailIntro }
-}
+/** 详情以用户模型为准；列表与详情共用同一份 Mock 记录。 */
+export const mockDetails = Object.fromEntries(
+  mockPersons.map((person) => [person.id, person])
+)
 
 /** 活动列表（活动页数据） */
 export const mockActivities = [

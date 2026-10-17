@@ -6,7 +6,7 @@
 
 - **首页（列表页）**：多人物基本信息卡片列表，支持关键词搜索、下拉刷新、上拉分页加载
 - **活动页**：活动列表（tabBar 第二个 tab），支持下拉刷新、上拉分页加载
-- **详情页**：基本信息 + **图片**（轮播 + 全屏预览）+ **视频**（播放器）+ **音频**（自定义播放器）
+- **详情页**：基本信息 + **四类图片**（支持全屏预览）+ **视频**（播放器）
 - **tabBar**：首页 / 活动 两个 tab（`app.config.js` 配置驱动，图标位于 `src/assets/tabbar/`）
 - **大屏适配**：移动端优先；rem 根字号限制在 20~24px（`maxRootSize: 24`），手机上满屏贴合，平板/桌面浏览器下自动变为 450px 宽的居中"手机卡片"，元素比例与设计稿一致
 
@@ -19,16 +19,21 @@
 ├── src/
 │   ├── app.js / app.config.js / app.scss   # 应用入口
 │   ├── index.html           # H5 模板（含大屏限宽居中外壳样式）
-│   ├── constants/index.js   # ★ 对接后端入口：API_BASE_URL / USE_MOCK 等
+│   ├── constants/index.js   # 省会及图片类型常量
+│   ├── model/user.ts        # 用户数据模型
 │   ├── services/
 │   │   ├── request.js       # ★ 统一请求封装（域名/token/错误处理）
-│   │   └── api.js           # ★ 接口定义（当前走 Mock，一键切换真实接口）
-│   ├── data/mock.js         # Mock 数据（字段结构即接口约定）
+│   │   └── api.js           # ★ 接口定义（读取 Supabase 聚合 JSON）
+│   ├── data/
+│   │   ├── mock.js          # 本地 Mock 数据（保留，不参与运行时数据加载）
+│   │   ├── persons.json     # 人员数据的本地 JSON 快照
+│   │   ├── activities.json  # 活动数据
+│   │   └── yyq.json         # 聚合数据（version、persons、activities）
 │   ├── utils/index.js       # 资源地址拼接、时长格式化
 │   └── pages/
 │       ├── index/           # 首页列表（tabBar tab 1）
 │       ├── activity/        # 活动列表（tabBar tab 2）
-│       └── detail/          # 详情页（图片/视频/音频 + AudioPlayer 组件）
+│       └── detail/          # 详情页（图片/视频）
 ```
 
 ## 运行
@@ -48,10 +53,10 @@ H5 使用 hash 路由（`http://host:10086/#/pages/index/index`）。路由保�
 
 页面只调用 `src/services/api.js`，接口切换不影响页面代码：
 
-1. `src/constants/index.js` 中把 `API_BASE_URL` 改为真实地址、`USE_MOCK` 置为 `false`；
+1. 人员和活动数据从 Supabase Storage 的 JSON 地址加载，响应对象包含 `version`、`persons` 和 `activities`；前端缓存整份数据 1 天，过期后重新请求；
 2. 若后端返回相对路径的媒体地址，设置 `RESOURCE_BASE_URL` 前缀；
 3. 若响应包结构不是 `{ code, message, data }`，在 `src/services/request.js` 中调整解包逻辑；需要登录态时在该文件的 `buildHeader` 中补充 token；
-4. `src/data/mock.js` 中的字段结构（列表项：`id/name/gender/age/city/occupation/avatar/brief/tags`；详情：`intro/photos[]/videos[]/audios[]`）即接口约定，保持一致即可无缝切换。
+4. 用户数据按 `src/model/user.ts` 中的 `PersonDetail` 结构组织。远程聚合数据请求失败时会将错误返回给调用方，不使用本地兜底数据。`src/data/yyq.json` 是版本号、人员和活动数据的本地聚合快照。当前只使用固定省会数据，城市字段暂不使用。
 
 ## 样式注意
 

@@ -3,12 +3,23 @@
  * 字段结构即"后端接口约定"：对接后端后保持一致即可无缝切换
  */
 
+/** 照片类型编码 */
+export type PhotoType = 1 | 2 | 3 | 999
+
 /** 照片信息 */
 export interface PhotoItem {
-  /** 照片类型（1: 全身照, 2: 脚照, 3: 身材照, 4: 胸照） */
-  type: number
+  /** 照片类型（1: 全身照, 2: 脚照, 3: 胸照, 999: 其他照） */
+  type: PhotoType
   /** 图片路径 */
   src: string
+}
+
+/** 测评链接 */
+export interface ReviewLink {
+  /** 测评日期 */
+  date: string
+  /** 测评链接地址 */
+  url: string
 }
 
 /** 基础用户信息（列表页展示） */
@@ -25,16 +36,20 @@ export interface PersonBase {
   height: number
   /** 体重（单位：kg） */
   weight: number
+  /** 罩杯 */
+  cupSize: string
   /** 鞋码 */
   shoeSize: number
-  /** 省会 */
+  /** 所属省级行政区名称 */
   province: string
-  /** 省会 ID（默认 0） */
+  /** 省级行政区划代码（默认 0） */
   provinceId: number
-  /** 城市 */
+  /** 城市（预留字段，当前未使用） */
   city: string
-  /** 城市 ID（默认 0） */
+  /** 城市 ID（预留字段，当前未使用） */
   cityId: number
+  /** 地址描述 */
+  addressDescription: string
   /** 头像 */
   avatar: string
   /** X（原名推特）账号 ID */
@@ -43,6 +58,14 @@ export interface PersonBase {
   qq: string
   /** 是否接受线下（true/false） */
   acceptOffline: boolean
+  /** 充值活动是否有优惠（true/false） */
+  hasRechargeActivityDiscount: boolean
+  /** 是否复购运费减免（true/false） */
+  freeShipping: boolean
+  /** 袜子首单最低价（单位：元） */
+  socksFirstOrderMinPrice: number
+  /** 内衣首单最低价（单位：元） */
+  underwearFirstOrderMinPrice: number
   /** 创建时间 */
   createdTime: string
   /** 更新时间 */
@@ -53,11 +76,13 @@ export interface PersonBase {
   photos: PhotoItem[]
   /** 视频列表 */
   videos: VideoItem[]
+  /** 测评链接列表 */
+  reviewLinks: ReviewLink[]
 }
 
 /** 视频信息 */
 export interface VideoItem {
-  /** 图片路径 */
+  /** 视频地址 */
   src: string
   /** 排序 */
   sort: number
@@ -84,20 +109,27 @@ export const PersonModel = {
       age: 0,
       height: 0,
       weight: 0,
+      cupSize: '',
       shoeSize: 0,
       province: '',
       provinceId: 0,
       city: '',
       cityId: 0,
+      addressDescription: '',
       avatar: '',
       xId: '',
       qq: '',
       acceptOffline: false,
+      hasRechargeActivityDiscount: false,
+      freeShipping: true,
+      socksFirstOrderMinPrice: 0,
+      underwearFirstOrderMinPrice: 0,
       createdTime: '',
       updateTime: '',
       job: '',
       photos: [],
       videos: [],
+      reviewLinks: [],
       ...data
     }
   },
