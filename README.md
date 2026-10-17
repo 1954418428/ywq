@@ -40,17 +40,9 @@ npm run dev:h5         # 开发（dist/ 产物，浏览器打开）
 npm run build:h5       # 构建
 ```
 
-### 路由（history 模式）
+### 路由（hash 模式）
 
-H5 使用 browser history 路由（`http://host:10086/pages/index/index`），**生产部署**需要服务端 fallback（所有路由回退到 index.html），nginx 示例：
-
-```nginx
-location / {
-  try_files $uri $uri/ /index.html;
-}
-```
-
-`publicPath` 已设为 `/`（history 模式下资源必须绝对路径）；如部署在子路径，需同时改 `publicPath`。
+H5 使用 hash 路由（`http://host:10086/#/pages/index/index`）。路由保存在 URL 的 `#` 后，刷新时仍请求 HTML 入口，不需要生产服务器配置 history fallback。`publicPath` 已设为 `/`；如部署在子路径，需同时调整 `publicPath`。
 
 ## 对接后端接口
 

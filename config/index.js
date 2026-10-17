@@ -26,7 +26,7 @@ const config = {
     staticDirectory: 'static',
     outputRoot: 'dist',
     router: {
-      mode: 'browser'
+      mode: 'hash'
     },
     postcss: {
       autoprefixer: {
