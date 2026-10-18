@@ -1,16 +1,16 @@
 /**
  * 数据服务（纯前端版本）
  *
- * 默认从 Supabase 聚合 JSON 地址加载，成功后缓存 24 小时；
- * 网络不可用或请求失败时自动回退到随构建打包的本地快照（src/data/yyq.json），
- * 避免列表空白。
+ * 每个标签页会话首次进入时请求一次远端 JSON，成功后写入 sessionStorage；
+ * 同一会话内（含刷新）直接使用 sessionStorage，不再请求；
+ * 请求失败时回退到随构建打包的本地快照（src/data/yyq.json），避免列表空白。
  *
  * 如需临时切换数据源，在 index.html 的入口脚本之前注入：
  *   <script>window.__YYQ_DATA_URL__ = 'https://example.com/yyq.json'</script>
  */
 import bundledData from '../data/yyq.json'
 import { DEFAULT_PAGE_SIZE } from '../constants'
-import { getStorage, setStorage } from '../utils/storage'
+import { getSessionStorage, setSessionStorage } from '../utils/storage'
 
 const DEFAULT_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi95eXEuanNvbiIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTIyNDYxNjIsImV4cCI6MTgyMzc4MjE2Mn0.cN-K0b7TLtl0y9Gm7vvOpXNowNQuP6_jqZUXj7XDNGXiHmeHbabFFcwmFdbHdSgtFCDja7MWZxxZxuiIxlHcRg'
 
@@ -19,15 +19,10 @@ const REMOTE_DATA_URL =
 
 const LOCAL_DATA = bundledData
 
-const DATA_CACHE_KEY = 'yyq-data-cache'
-const DATA_CACHE_TTL = 24 * 60 * 60 * 1000
+const SESSION_CACHE_KEY = 'yyq-session-data'
 const DATA_REQUEST_TIMEOUT = 8000
-// 远端失败后的冷却时间：避免首页/活动页同时挂载时连续重试同一个不可用地址
-const DATA_FAILURE_COOLDOWN = 60 * 1000
 
 let dataPromise
-let dataFetchedAt = 0
-let lastFailureAt = 0
 
 function isValidData(data) {
   return Boolean(
@@ -49,31 +44,15 @@ function isValidData(data) {
   )
 }
 
-function readCachedData() {
-  const cached = getStorage(DATA_CACHE_KEY)
-  if (
-    cached &&
-    Number.isFinite(cached.fetchedAt) &&
-    cached.fetchedAt <= Date.now() &&
-    cached.version === cached.data?.version &&
-    isValidData(cached.data)
-  ) {
-    return cached
-  }
-  return null
+function readSessionData() {
+  const cached = getSessionStorage(SESSION_CACHE_KEY)
+  return isValidData(cached) ? cached : null
 }
 
-function cacheData(data) {
-  const fetchedAt = Date.now()
-  const saved = setStorage(DATA_CACHE_KEY, {
-    version: data.version,
-    fetchedAt,
-    data
-  })
-  if (!saved) {
-    console.error('Failed to cache yyq data.')
+function cacheSessionData(data) {
+  if (!setSessionStorage(SESSION_CACHE_KEY, data)) {
+    console.error('Failed to cache yyq data in sessionStorage.')
   }
-  return fetchedAt
 }
 
 async function fetchJson(url) {
@@ -104,6 +83,7 @@ function buildDataUrl(timestamp) {
   return url.toString()
 }
 
+/** 远端失败时的兜底：使用打包快照（不写入 sessionStorage，下次会话会重试） */
 function getLocalData() {
   if (!isValidData(LOCAL_DATA)) {
     throw new Error('Bundled yyq data has an invalid JSON shape')
@@ -117,41 +97,34 @@ function getData() {
     return Promise.resolve(getLocalData())
   }
 
-  const now = Date.now()
-  if (dataPromise && (dataFetchedAt === 0 || now - dataFetchedAt < DATA_CACHE_TTL)) {
+  // 同一次 app 运行内只发起一次请求，所有页面共享同一个 Promise
+  if (dataPromise) {
     return dataPromise
   }
 
-  // 刚失败过：冷却期内直接用本地快照，避免首页/活动页重复请求同一个不可用地址
-  if (now - lastFailureAt < DATA_FAILURE_COOLDOWN) {
-    return Promise.resolve(getLocalData())
-  }
-
-  const cached = readCachedData()
-  if (cached && now - cached.fetchedAt < DATA_CACHE_TTL) {
-    lastFailureAt = 0
-    dataFetchedAt = cached.fetchedAt
-    dataPromise = Promise.resolve(cached.data)
+  // 当前标签页会话已有数据：不再请求
+  const cached = readSessionData()
+  if (cached) {
+    dataPromise = Promise.resolve(cached)
     return dataPromise
   }
 
-  dataFetchedAt = 0
-  dataPromise = fetchJson(buildDataUrl(now))
+  // 没有会话缓存：请求一次并写入 sessionStorage
+  dataPromise = fetchJson(buildDataUrl(Date.now()))
     .then((data) => {
       if (!isValidData(data)) {
         throw new Error('Remote yyq data has an invalid JSON shape')
       }
-      dataFetchedAt = cacheData(data)
-      lastFailureAt = 0
+      cacheSessionData(data)
       return data
     })
     .catch((error) => {
-      dataPromise = null
-      dataFetchedAt = 0
-      lastFailureAt = Date.now()
       console.warn('Failed to load remote yyq data, using bundled snapshot.', error)
-      return getLocalData()
+      // 失败不写 sessionStorage；本次运行内用本地快照，下次进入 app 再请求
+      dataPromise = Promise.resolve(getLocalData())
+      return dataPromise
     })
+
   return dataPromise
 }
 
