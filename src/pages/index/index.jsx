@@ -90,7 +90,7 @@ export default function IndexPage() {
 
   return (
     <div className="page">
-      <PageHeader title="人物列表" />
+      <PageHeader title="原味牵" />
 
       <div className="search-wrap">
         <input

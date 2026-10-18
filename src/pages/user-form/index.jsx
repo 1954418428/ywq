@@ -3,8 +3,9 @@ import InfoModal from '../../components/InfoModal'
 import PageHeader from '../../components/PageHeader'
 import SelectionModal from '../../components/SelectionModal'
 import { toast } from '../../components/Toast'
-import { ACTIVITY_RULES, PROVINCE_CAPITALS } from '../../constants'
+import { ACTIVITY_RULES, PHOTO_TYPES, PROVINCE_CAPITALS } from '../../constants'
 import { PersonModel } from '../../model/user'
+import { copyText } from '../../utils'
 import './index.scss'
 
 const PROVINCE_OPTIONS = PROVINCE_CAPITALS.map(({ provinceId, province }) => ({
@@ -16,6 +17,21 @@ const formatDateTime = (date = new Date()) => {
   const pad = (value) => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
+
+/** 图片模型：每种类型生成一张，src 留空等上传后回填 */
+const createPhotoModels = () =>
+  PHOTO_TYPES.map(({ type }) => ({
+    type,
+    src: ''
+  }))
+
+/** 视频模型：至少生成一条，src 留空等上传后回填 */
+const createVideoModels = () => [
+  {
+    src: '',
+    sort: 1
+  }
+]
 
 const createInitialForm = () => {
   const now = formatDateTime()
@@ -43,8 +59,8 @@ const createInitialForm = () => {
     underwearFirstOrderMinPrice: 0,
     job: '',
     reviewLinks: [],
-    photos: [],
-    videos: [],
+    photos: createPhotoModels(),
+    videos: createVideoModels(),
     createdTime: now,
     updateTime: now
   })
@@ -88,7 +104,7 @@ export default function UserFormPage() {
     setShowProvincePicker(false)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const payload = {
       ...PersonModel.createDetail(),
       ...form,
@@ -103,13 +119,16 @@ export default function UserFormPage() {
       freeShipping: form.freeShipping === true,
       reviewLinks: (form.reviewLinks || []).filter((item) => item.date || item.url),
       avatar: '',
-      photos: [],
-      videos: [],
+      photos: createPhotoModels(),
+      videos: createVideoModels(),
       updateTime: formatDateTime()
     }
 
-    console.log('user-form-submit', JSON.stringify(payload, null, 2))
-    toast('用户信息已构造完成')
+    const json = JSON.stringify(payload, null, 2)
+    console.log('user-form-submit', json)
+
+    const copied = await copyText(json)
+    toast(copied ? '用户信息 JSON 已复制' : '复制失败，请查看控制台')
   }
 
   return (

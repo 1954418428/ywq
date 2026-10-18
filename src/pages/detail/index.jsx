@@ -10,16 +10,26 @@ import PageHeader from '../../components/PageHeader'
 import { toast } from '../../components/Toast'
 import './index.scss'
 
+/** 媒体项是否已填写 src（空串、纯空白都视为未填写） */
+const hasSrc = (item) => Boolean(String(item?.src || '').trim())
+
+/** 根据真正有 src 的媒体决定默认 tab；都没有时仍默认视频 */
+const getInitialMediaType = (person) => {
+  if (!person) return 'video'
+  if ((person.videos || []).some(hasSrc)) return 'video'
+  if ((person.photos || []).some(hasSrc)) return 'photo'
+  return 'video'
+}
+
 export default function DetailPage() {
   const [searchParams] = useSearchParams()
   const personId = searchParams.get('id') || ''
 
   // 首帧同步直出已缓存的详情（从列表页进入时已预取），避免"加载中→内容"的闪动
-  const [detail, setDetail] = useState(() => peekPersonDetail(personId))
-  const [loading, setLoading] = useState(() => !peekPersonDetail(personId))
-  const [mediaType, setMediaType] = useState(() =>
-    peekPersonDetail(personId)?.videos?.length ? 'video' : 'photo'
-  )
+  const cachedDetail = peekPersonDetail(personId)
+  const [detail, setDetail] = useState(cachedDetail)
+  const [loading, setLoading] = useState(!cachedDetail)
+  const [mediaType, setMediaType] = useState(() => getInitialMediaType(cachedDetail))
   const [mediaIndex, setMediaIndex] = useState(0)
   const [previewIndex, setPreviewIndex] = useState(-1)
   const [ruleModal, setRuleModal] = useState(null)
@@ -30,7 +40,7 @@ export default function DetailPage() {
     const cached = peekPersonDetail(personId)
     if (cached) {
       setDetail(cached)
-      setMediaType(cached.videos?.length ? 'video' : 'photo')
+      setMediaType(getInitialMediaType(cached))
       setLoading(false)
       return undefined
     }
@@ -42,7 +52,7 @@ export default function DetailPage() {
         if (cancelled) return
         setDetail(result)
         // 与 detail 同一批更新，避免媒体 tab 先按默认值渲染一帧
-        setMediaType(result?.videos?.length ? 'video' : 'photo')
+        setMediaType(getInitialMediaType(result))
         setMediaIndex(0)
       })
       .catch((error) => {
@@ -60,14 +70,14 @@ export default function DetailPage() {
   useEffect(() => {
     document.title = detail?.nickname || '人物详情'
     return () => {
-      document.title = '人物展示'
+      document.title = '原味牵'
     }
   }, [detail?.nickname])
 
   useEffect(() => {
     if (!detail) return
     setMediaIndex(0)
-    setMediaType(detail.videos?.length ? 'video' : 'photo')
+    setMediaType(getInitialMediaType(detail))
   }, [detail?.id])
 
   if (loading) {
@@ -92,12 +102,15 @@ export default function DetailPage() {
     )
   }
 
-  const photos = (detail.photos || []).map((photo) => ({
-    ...photo,
-    url: resolveResourceUrl(photo.src),
-    label: PHOTO_TYPES.find(({ type }) => type === photo.type)?.label
-  }))
+  const photos = (detail.photos || [])
+    .filter(hasSrc)
+    .map((photo) => ({
+      ...photo,
+      url: resolveResourceUrl(photo.src),
+      label: PHOTO_TYPES.find(({ type }) => type === photo.type)?.label
+    }))
   const videos = [...(detail.videos || [])]
+    .filter(hasSrc)
     .sort((a, b) => a.sort - b.sort)
     .map((video) => ({ ...video, url: resolveResourceUrl(video.src) }))
   const mediaItems = [
@@ -107,6 +120,12 @@ export default function DetailPage() {
   const currentMedia = mediaItems[mediaIndex]
   const showMedia = Boolean(currentMedia) && currentMedia.type === mediaType
   const xId = (detail.xId || '').trim().replace(/^@/, '')
+  const avatarUrl = resolveResourceUrl(detail.avatar)
+  const emptyMediaText = mediaItems.length === 0
+    ? '暂无媒体'
+    : mediaType === 'video'
+      ? '暂无视频'
+      : '暂无照片'
   const imageUrls = photos.map((photo) => photo.url)
 
   const switchMediaType = (type) => {
@@ -199,7 +218,7 @@ export default function DetailPage() {
               />
             ) : (
               <div className="media-empty">
-                <span>{mediaType === 'video' ? '暂无视频' : '暂无照片'}</span>
+                <span>{emptyMediaText}</span>
               </div>
             )}
             {currentMedia?.type === 'photo' && showMedia ? (
@@ -213,12 +232,15 @@ export default function DetailPage() {
         {/* 基本信息 */}
         <div className="profile-card">
           <div className="profile-head" onClick={openXProfile}>
-            <img
-              className="profile-avatar"
-              src={resolveResourceUrl(detail.avatar)}
-              alt={detail.nickname}
-            />
-            <div className="profile-info">
+            {avatarUrl ? (
+              <img
+                className="profile-avatar"
+                src={avatarUrl}
+                alt={detail.nickname}
+              />
+            ) : (
+              <div className="profile-avatar" aria-hidden="true" />
+            )}<div className="profile-info">
               <div className="profile-name-row">
                 <span className="profile-name">{detail.nickname}</span>
                 {xId ? <span className="profile-x">@{xId}</span> : null}
