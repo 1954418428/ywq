@@ -1,8 +1,18 @@
 .user-form-page {
-  box-sizing: border-box;
-  min-height: 100vh;
-  padding: 24px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   background: #f5f6f8;
+}
+
+.user-form-body {
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .user-form-header {
@@ -10,6 +20,7 @@
 }
 
 .user-form-title {
+  display: block;
   color: #1f2937;
   font-size: 38px;
   font-weight: bold;
@@ -92,16 +103,19 @@
 
 .field-input {
   box-sizing: border-box;
+  display: block;
   width: 100%;
   height: 72px;
   min-height: 72px;
   padding: 0 18px;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
+  outline: none;
   background: #f9fafb;
   color: #1f2937;
   font-size: 26px;
   line-height: 72px;
+  appearance: none;
 }
 
 .gender-fixed {
@@ -126,11 +140,13 @@
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
+  width: 100%;
   height: 72px;
   padding: 0 18px;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   background: #f9fafb;
+  text-align: left;
 }
 
 .picker-text {
@@ -183,6 +199,7 @@
   background: #f9fafb;
   color: #6b7280;
   font-size: 22px;
+  cursor: pointer;
 }
 
 .boolean-option-active {
@@ -192,37 +209,17 @@
   font-weight: bold;
 }
 
-.review-link-box {
-  margin-bottom: 16px;
-}
-
-.mini-btn {
-  margin-top: 8px;
-  border-radius: 18px;
-  background: #fbe8f1;
-  color: #d4237a;
-  font-size: 24px;
-  line-height: 64px;
-}
-
 .user-form-actions {
   padding-bottom: 32px;
 }
 
 .submit-btn {
+  display: block;
+  width: 100%;
   border-radius: 20px;
   background: #d4237a;
   color: #ffffff;
   font-size: 30px;
   font-weight: bold;
   line-height: 88px;
-}
-
-.submit-btn::after {
-  border: none;
-}
-
-.mini-btn::after,
-.field-input::after {
-  border: none;
 }

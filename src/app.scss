@@ -1,11 +1,122 @@
-/* 全局样式（跨端：H5 / RN）
- * 注意：RN 端仅支持类选择器，请勿在此使用标签/ID/后代选择器
- * H5 外壳样式（html/body/#app 限宽居中）位于 index.html 中
- */
+/* 全局样式：应用骨架 + 通用工具类（尺寸按 750 设计稿，构建时由 postcss 转为 rem） */
 
-.app-root {
-  min-height: 100vh;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #e8ebf1;
+  color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+img {
+  display: block;
+}
+
+/*
+ * 安全区与底栏尺寸统一变量：
+ * - --safe-bottom 用于 tabBar、详情底部按钮条等贴底元素；
+ * - --app-tabbar-height / --app-contact-height 是它们的实际占用高度（含安全区）。
+ * 不支持 env() 的浏览器会退回 0px。
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-header-height: calc(80px + var(--safe-top));
+  --app-tabbar-height: 100px;
+  --app-contact-height: calc(121px + var(--safe-bottom));
+}
+
+/* 应用外壳：flex 列布局的基础结构 */
+.app-shell {
+  display: flex;
+  flex-direction: column;
   background: #f5f6f8;
+}
+
+/*
+ * 布局 1（flex）：整页是 flex 列，顶栏占位，只有内容容器内部滚动。
+ * 首页、活动页、录入页使用。
+ *
+ * 用 position: fixed + top/bottom 贴住可视区域，而不是 100vh：
+ * 100vh 在 iOS Safari / 部分 Android 浏览器里会包含浏览器底部工具栏的高度，
+ * 导致 tabBar 和页面底部按钮被浏览器 UI 挡住。
+ */
+.app-shell[data-layout='flex'] {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+/*
+ * 布局 2（fixed）：不约束高度，页面内容跟随文档滚动；
+ * 顶栏使用 position: fixed，内容通过 padding-top 让出顶栏高度。
+ * 详情页使用。
+ */
+.app-shell[data-layout='fixed'] {
+  position: relative;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.app-shell[data-layout='fixed'] .app-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.app-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* tab 页常驻容器：隐藏时保留组件状态（keep-alive） */
+.route-pane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.route-pane[hidden] {
+  display: none;
 }
 
 /* 通用文本省略 */

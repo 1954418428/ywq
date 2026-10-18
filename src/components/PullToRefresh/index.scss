@@ -1,0 +1,20 @@
+.ptr-scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.ptr-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #9ca3af;
+  font-size: 24px;
+}
+
+.ptr-indicator-text {
+  line-height: 1;
+  white-space: nowrap;
+}

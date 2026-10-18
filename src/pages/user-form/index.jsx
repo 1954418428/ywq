@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Button, Input, Text, View } from '@tarojs/components'
-import Taro from '@tarojs/taro'
 import InfoModal from '../../components/InfoModal'
+import PageHeader from '../../components/PageHeader'
 import SelectionModal from '../../components/SelectionModal'
+import { toast } from '../../components/Toast'
 import { ACTIVITY_RULES, PROVINCE_CAPITALS } from '../../constants'
 import { PersonModel } from '../../model/user'
 import './index.scss'
@@ -58,15 +58,14 @@ export default function UserFormPage() {
   const updateTextField = (field) => (event) => {
     setForm((prev) => ({
       ...prev,
-      [field]: event.detail.value
+      [field]: event.target.value
     }))
   }
 
   const updateNumberField = (field) => (event) => {
-    const value = event.detail.value
     setForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: event.target.value
     }))
   }
 
@@ -110,248 +109,286 @@ export default function UserFormPage() {
     }
 
     console.log('user-form-submit', JSON.stringify(payload, null, 2))
-    Taro.showToast({
-      title: '用户信息已构造完成',
-      icon: 'success'
-    })
+    toast('用户信息已构造完成')
   }
 
   return (
-    <View className="user-form-page">
-      <View className="user-form-header">
-        <Text className="user-form-title">创建用户资料</Text>
-      </View>
+    <div className="user-form-page">
+      <PageHeader title="用户资料录入" back />
 
-      <View className="user-form-section">
-        <Text className="section-title">基础信息</Text>
+      <div className="user-form-body">
+        <div className="user-form-header">
+          <span className="user-form-title">创建用户资料</span>
+        </div>
 
-        <View className="field-row">
-          <View className="field-box field-box-wide">
-            <Text className="field-label">昵称</Text>
-            <Input
-              className="field-input"
-              value={form.nickname}
-              placeholder="x(推特)平台网名"
-              onInput={updateTextField('nickname')}
-            />
-          </View>
-        </View>
+        <div className="user-form-section">
+          <span className="section-title">基础信息</span>
 
-        <View className="field-row two-col">
-          <View className="field-box">
-            <Text className="field-label">性别</Text>
-            <View className="gender-fixed">
-              <Text className="gender-fixed-text">女</Text>
-            </View>
-          </View>
+          <div className="field-row">
+            <div className="field-box field-box-wide">
+              <span className="field-label">昵称</span>
+              <input
+                className="field-input"
+                value={form.nickname}
+                placeholder="x(推特)平台网名"
+                onChange={updateTextField('nickname')}
+              />
+            </div>
+          </div>
 
-          <View className="field-box">
-            <Text className="field-label">年龄</Text>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.age)}
-              onInput={updateNumberField('age')}
-            />
-          </View>
-        </View>
+          <div className="field-row two-col">
+            <div className="field-box">
+              <span className="field-label">性别</span>
+              <div className="gender-fixed">
+                <span className="gender-fixed-text">女</span>
+              </div>
+            </div>
 
-        <View className="field-row three-col">
-          <View className="field-box">
-            <Text className="field-label">身高(cm)</Text>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.height)}
-              onInput={updateNumberField('height')}
-            />
-          </View>
+            <div className="field-box">
+              <span className="field-label">年龄</span>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.age)}
+                onChange={updateNumberField('age')}
+              />
+            </div>
+          </div>
 
-          <View className="field-box">
-            <Text className="field-label">体重(kg)</Text>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.weight)}
-              onInput={updateNumberField('weight')}
-            />
-          </View>
+          <div className="field-row three-col">
+            <div className="field-box">
+              <span className="field-label">身高(cm)</span>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.height)}
+                onChange={updateNumberField('height')}
+              />
+            </div>
 
-          <View className="field-box">
-            <Text className="field-label">罩杯</Text>
-            <Input
-              className="field-input"
-              value={form.cupSize}
-              placeholder="如 B"
-              onInput={updateTextField('cupSize')}
-            />
-          </View>
-        </View>
+            <div className="field-box">
+              <span className="field-label">体重(kg)</span>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.weight)}
+                onChange={updateNumberField('weight')}
+              />
+            </div>
 
-        <View className="field-row">
-          <View className="field-box">
-            <Text className="field-label">鞋码</Text>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.shoeSize)}
-              onInput={updateNumberField('shoeSize')}
-            />
-          </View>
-        </View>
-      </View>
+            <div className="field-box">
+              <span className="field-label">罩杯</span>
+              <input
+                className="field-input"
+                value={form.cupSize}
+                placeholder="如 B"
+                onChange={updateTextField('cupSize')}
+              />
+            </div>
+          </div>
 
-      <View className="user-form-section">
-        <Text className="section-title">联系与地区</Text>
+          <div className="field-row">
+            <div className="field-box">
+              <span className="field-label">鞋码</span>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.shoeSize)}
+                onChange={updateNumberField('shoeSize')}
+              />
+            </div>
+          </div>
+        </div>
 
-        <View className="field-row">
-          <View className="field-box field-box-wide">
-            <Text className="field-label">省份</Text>
-            <View className="picker-trigger" onClick={() => setShowProvincePicker(true)}>
-              <Text className="picker-text">{form.province || '请选择省份'}</Text>
-              <Text className="picker-arrow">▾</Text>
-            </View>
-          </View>
-        </View>
+        <div className="user-form-section">
+          <span className="section-title">联系与地区</span>
 
-        <View className="field-row">
-          <View className="field-box">
-            <Text className="field-label">详细地址</Text>
-            <Input
-              className="field-input"
-              value={form.addressDescription}
-              placeholder="填地级城市，比如长沙/武汉/广州/北京"
-              onInput={updateTextField('addressDescription')}
-            />
-          </View>
-        </View>
-
-        <View className="field-row">
-          <View className="field-box">
-            <Text className="field-label">职业</Text>
-            <Input
-              className="field-input"
-              value={form.job}
-              placeholder="请输入职业"
-              onInput={updateTextField('job')}
-            />
-          </View>
-        </View>
-
-        <View className="field-row">
-          <View className="field-box">
-            <Text className="field-label">X ID</Text>
-            <Input
-              className="field-input"
-              value={form.xId}
-              placeholder="x(推特)平台ID，不需要@符号，比如 tb_fzy333"
-              onInput={updateTextField('xId')}
-            />
-          </View>
-        </View>
-
-        <View className="field-row">
-          <View className="field-box">
-            <Text className="field-label">QQ</Text>
-            <Input
-              className="field-input"
-              value={form.qq}
-              placeholder="请输入 QQ"
-              onInput={updateTextField('qq')}
-            />
-          </View>
-        </View>
-      </View>
-
-      <View className="user-form-section">
-        <Text className="section-title">交易与活动</Text>
-
-        <View className="toggle-row">
-          <View className="toggle-label-row">
-            <Text className="toggle-label">接受线下</Text>
-            <Text className="user-form-help" onClick={() => setInfoModal(ACTIVITY_RULES.offline)}>?</Text>
-          </View>
-          <View className="boolean-options">
-            {[['是', true], ['否', false]].map(([label, value]) => (
-              <Text
-                key={label}
-                className={`boolean-option ${form.acceptOffline === value ? 'boolean-option-active' : ''}`}
-                onClick={() => setBooleanField('acceptOffline', value)}
+          <div className="field-row">
+            <div className="field-box field-box-wide">
+              <span className="field-label">省份</span>
+              <button
+                type="button"
+                className="picker-trigger"
+                onClick={() => setShowProvincePicker(true)}
               >
-                {label}
-              </Text>
-            ))}
-          </View>
-        </View>
+                <span className="picker-text">{form.province || '请选择省份'}</span>
+                <span className="picker-arrow">▾</span>
+              </button>
+            </div>
+          </div>
 
-        <View className="toggle-row">
-          <View className="toggle-label-row">
-            <Text className="toggle-label">充值活动优惠</Text>
-            <Text className="user-form-help" onClick={() => setInfoModal(ACTIVITY_RULES.recharge)}>?</Text>
-          </View>
-          <View className="boolean-options">
-            {[['是', true], ['否', false]].map(([label, value]) => (
-              <Text
-                key={label}
-                className={`boolean-option ${form.hasRechargeActivityDiscount === value ? 'boolean-option-active' : ''}`}
-                onClick={() => setBooleanField('hasRechargeActivityDiscount', value)}
+          <div className="field-row">
+            <div className="field-box">
+              <span className="field-label">详细地址</span>
+              <input
+                className="field-input"
+                value={form.addressDescription}
+                placeholder="填地级城市，比如长沙/武汉/广州/北京"
+                onChange={updateTextField('addressDescription')}
+              />
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field-box">
+              <span className="field-label">职业</span>
+              <input
+                className="field-input"
+                value={form.job}
+                placeholder="请输入职业"
+                onChange={updateTextField('job')}
+              />
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field-box">
+              <span className="field-label">X ID</span>
+              <input
+                className="field-input"
+                value={form.xId}
+                placeholder="x(推特)平台ID，不需要@符号，比如 tb_fzy333"
+                onChange={updateTextField('xId')}
+              />
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field-box">
+              <span className="field-label">QQ</span>
+              <input
+                className="field-input"
+                value={form.qq}
+                placeholder="请输入 QQ"
+                onChange={updateTextField('qq')}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="user-form-section">
+          <span className="section-title">交易与活动</span>
+
+          <div className="toggle-row">
+            <div className="toggle-label-row">
+              <span className="toggle-label">接受线下</span>
+              <span
+                className="user-form-help"
+                onClick={() => setInfoModal(ACTIVITY_RULES.offline)}
               >
-                {label}
-              </Text>
-            ))}
-          </View>
-        </View>
+                ?
+              </span>
+            </div>
+            <div className="boolean-options">
+              {[['是', true], ['否', false]].map(([label, value]) => (
+                <span
+                  key={label}
+                  className={`boolean-option${form.acceptOffline === value ? ' boolean-option-active' : ''}`}
+                  onClick={() => setBooleanField('acceptOffline', value)}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
 
-        <View className="toggle-row">
-          <View className="toggle-label-row">
-            <Text className="toggle-label">复购运费减免</Text>
-            <Text className="user-form-help" onClick={() => setInfoModal(ACTIVITY_RULES.freeShipping)}>?</Text>
-          </View>
-          <View className="boolean-options">
-            {[['是', true], ['否', false]].map(([label, value]) => (
-              <Text
-                key={label}
-                className={`boolean-option ${form.freeShipping === value ? 'boolean-option-active' : ''}`}
-                onClick={() => setBooleanField('freeShipping', value)}
+          <div className="toggle-row">
+            <div className="toggle-label-row">
+              <span className="toggle-label">充值活动优惠</span>
+              <span
+                className="user-form-help"
+                onClick={() => setInfoModal(ACTIVITY_RULES.recharge)}
               >
-                {label}
-              </Text>
-            ))}
-          </View>
-        </View>
+                ?
+              </span>
+            </div>
+            <div className="boolean-options">
+              {[['是', true], ['否', false]].map(([label, value]) => (
+                <span
+                  key={label}
+                  className={`boolean-option${form.hasRechargeActivityDiscount === value ? ' boolean-option-active' : ''}`}
+                  onClick={() => setBooleanField('hasRechargeActivityDiscount', value)}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
 
-        <View className="field-row two-col">
-          <View className="field-box">
-            <View className="field-label-row">
-              <Text className="field-label">袜子首单最低价</Text>
-              <Text className="user-form-help" onClick={() => setInfoModal(ACTIVITY_RULES.firstOrderPrice)}>?</Text>
-            </View>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.socksFirstOrderMinPrice)}
-              onInput={updateNumberField('socksFirstOrderMinPrice')}
-            />
-          </View>
+          <div className="toggle-row">
+            <div className="toggle-label-row">
+              <span className="toggle-label">复购运费减免</span>
+              <span
+                className="user-form-help"
+                onClick={() => setInfoModal(ACTIVITY_RULES.freeShipping)}
+              >
+                ?
+              </span>
+            </div>
+            <div className="boolean-options">
+              {[['是', true], ['否', false]].map(([label, value]) => (
+                <span
+                  key={label}
+                  className={`boolean-option${form.freeShipping === value ? ' boolean-option-active' : ''}`}
+                  onClick={() => setBooleanField('freeShipping', value)}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
 
-          <View className="field-box">
-            <View className="field-label-row">
-              <Text className="field-label">内衣首单最低价</Text>
-              <Text className="user-form-help" onClick={() => setInfoModal(ACTIVITY_RULES.firstOrderPrice)}>?</Text>
-            </View>
-            <Input
-              className="field-input"
-              type="number"
-              value={String(form.underwearFirstOrderMinPrice)}
-              onInput={updateNumberField('underwearFirstOrderMinPrice')}
-            />
-          </View>
-        </View>
-      </View>
+          <div className="field-row two-col">
+            <div className="field-box">
+              <div className="field-label-row">
+                <span className="field-label">袜子首单最低价</span>
+                <span
+                  className="user-form-help"
+                  onClick={() => setInfoModal(ACTIVITY_RULES.firstOrderPrice)}
+                >
+                  ?
+                </span>
+              </div>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.socksFirstOrderMinPrice)}
+                onChange={updateNumberField('socksFirstOrderMinPrice')}
+              />
+            </div>
 
-      <View className="user-form-actions">
-        <Button className="submit-btn" onClick={handleSubmit}>提交用户信息</Button>
-      </View>
+            <div className="field-box">
+              <div className="field-label-row">
+                <span className="field-label">内衣首单最低价</span>
+                <span
+                  className="user-form-help"
+                  onClick={() => setInfoModal(ACTIVITY_RULES.firstOrderPrice)}
+                >
+                  ?
+                </span>
+              </div>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.underwearFirstOrderMinPrice)}
+                onChange={updateNumberField('underwearFirstOrderMinPrice')}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="user-form-actions">
+          <button type="button" className="submit-btn" onClick={handleSubmit}>
+            提交用户信息
+          </button>
+        </div>
+      </div>
 
       <SelectionModal
         visible={showProvincePicker}
@@ -362,11 +399,11 @@ export default function UserFormPage() {
         onClose={() => setShowProvincePicker(false)}
       />
       <InfoModal
-        visible={!!infoModal}
+        visible={Boolean(infoModal)}
         title={infoModal?.title}
         content={infoModal?.content}
         onClose={() => setInfoModal(null)}
       />
-    </View>
+    </div>
   )
 }

@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2020",
     "module": "ESNext",
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
@@ -12,11 +13,7 @@
     "checkJs": false,
     "noEmit": true,
     "isolatedModules": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "lib": ["DOM", "ESNext"],
-    "types": ["@tarojs/components", "@tarojs/taro"]
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

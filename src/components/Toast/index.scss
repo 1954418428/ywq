@@ -1,0 +1,27 @@
+.app-toast {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  z-index: 3000;
+  max-width: 70vw;
+  padding: 20px 32px;
+  border-radius: 16px;
+  background: rgba(17, 24, 39, 0.86);
+  color: #ffffff;
+  font-size: 26px;
+  line-height: 38px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: app-toast-in 0.16s ease-out both;
+  pointer-events: none;
+}
+
+@keyframes app-toast-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

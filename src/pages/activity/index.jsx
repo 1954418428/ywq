@@ -1,85 +1,83 @@
-import { useCallback, useEffect, useState } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getActivityList } from '../../services/api'
+import PageHeader from '../../components/PageHeader'
+import PullToRefresh from '../../components/PullToRefresh'
+import { toast } from '../../components/Toast'
 import './index.scss'
 
-export default function Activity() {
+export default function ActivityPage() {
   const [list, setList] = useState([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
 
-  const load = useCallback(
-    async (pageNum = 1, mode = 'reset') => {
-      setLoading(true)
-      try {
-        const res = await getActivityList({ page: pageNum })
-        setList((prev) => (mode === 'append' ? [...prev, ...res.list] : res.list))
-        setHasMore(!!res.hasMore)
-        setPage(pageNum)
-      } catch (e) {
-        Taro.showToast({ title: e.message || '加载失败', icon: 'none' })
-      } finally {
+  const loadingRef = useRef(false)
+  const requestIdRef = useRef(0)
+
+  const load = useCallback(async (pageNum = 1, mode = 'reset') => {
+    if (mode === 'append' && loadingRef.current) return
+    const requestId = requestIdRef.current + 1
+    requestIdRef.current = requestId
+    loadingRef.current = true
+    setLoading(true)
+    try {
+      const res = await getActivityList({ page: pageNum })
+      if (requestId !== requestIdRef.current) return
+      setList((prev) => (mode === 'append' ? [...prev, ...res.list] : res.list))
+      setHasMore(Boolean(res.hasMore))
+      setPage(pageNum)
+    } catch (error) {
+      if (requestId === requestIdRef.current) {
+        toast(error.message || '加载失败')
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        loadingRef.current = false
         setLoading(false)
       }
-    },
-    []
-  )
+    }
+  }, [])
 
   useEffect(() => {
     load(1, 'reset')
   }, [load])
 
-  /** 下拉刷新（ScrollView refresher，H5/RN 通用） */
-  const onRefresh = async () => {
-    setRefreshing(true)
-    await load(1, 'reset')
-    setRefreshing(false)
-  }
+  const onRefresh = () => load(1, 'reset')
 
-  /** 上拉加载更多 */
-  const onLoadMore = () => {
-    if (loading || !hasMore) return
+  const handleScroll = (event) => {
+    const element = event.currentTarget
+    const distanceToBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+    if (distanceToBottom > 120) return
+    if (loadingRef.current || !hasMore) return
     load(page + 1, 'append')
   }
 
   return (
-    <View className="activity-page">
-      <ScrollView
-        className="activity-list"
-        scrollY
-        refresherEnabled
-        refresherTriggered={refreshing}
-        onRefresherRefresh={onRefresh}
-        onScrollToLower={onLoadMore}
-      >
+    <div className="activity-page">
+      <PageHeader title="活动" />
+
+      <PullToRefresh className="activity-list" onRefresh={onRefresh} onScroll={handleScroll}>
         {list.map((item) => (
-          <View key={item.id} className="activity-card">
-            <View className="activity-head">
-              <Text className="activity-title" numberOfLines={1}>
-                {item.title}
-              </Text>
-              <Text className="activity-date">{item.date}</Text>
-            </View>
-            <Text className="activity-content" numberOfLines={2}>
-              {item.content}
-            </Text>
-          </View>
+          <div key={item.id} className="activity-card">
+            <div className="activity-head">
+              <span className="activity-title ellipsis">{item.title}</span>
+              <span className="activity-date">{item.date}</span>
+            </div>
+            <span className="activity-content ellipsis-2">{item.content}</span>
+          </div>
         ))}
-        <View className="activity-footer">
+        <div className="activity-footer">
           {list.length === 0 && !loading ? (
-            <Text className="footer-text">暂无活动</Text>
+            <span className="footer-text">暂无活动</span>
           ) : loading ? (
-            <Text className="footer-text">加载中...</Text>
+            <span className="footer-text">加载中...</span>
           ) : hasMore ? (
-            <Text className="footer-text">上拉加载更多</Text>
+            <span className="footer-text">上拉加载更多</span>
           ) : (
-            <Text className="footer-text">— 没有更多了 —</Text>
+            <span className="footer-text">— 没有更多了 —</span>
           )}
-        </View>
-      </ScrollView>
-    </View>
+        </div>
+      </PullToRefresh>
+    </div>
   )
 }

@@ -1,11 +1,10 @@
-/* 首页样式（750 设计稿；RN 兼容：仅类选择器，媒体查询 RN 端自动忽略） */
+/* 首页样式（750 设计稿，构建时 px -> rem） */
 
 .page {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100vh;
-  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
-  box-sizing: border-box;
+  min-height: 0;
   background: #f5f6f8;
 }
 
@@ -16,13 +15,19 @@
 }
 
 .search-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
   height: 68px;
-  line-height: 68px;
+  padding: 0 30px;
+  border: 0;
+  outline: none;
   background: #f0f2f5;
   border-radius: 34px;
-  padding: 0 30px;
-  font-size: 26px;
   color: #1f2937;
+  font-size: 26px;
+  line-height: 68px;
+  appearance: none;
 }
 
 .capital-filter {
@@ -67,12 +72,10 @@
 }
 
 .list {
-  box-sizing: border-box; /* scroll-view 自带 width:100%，不加 border-box 会加 padding 溢出 */
+  box-sizing: border-box;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
   padding: 24px;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* 卡片网格布局（CSS Grid）：
@@ -89,6 +92,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
   background: #ffffff;
   border-radius: 24px;
   padding: 32px 20px;
@@ -99,6 +103,7 @@
   height: 120px;
   border-radius: 60px;
   background: #e5e7eb;
+  object-fit: cover;
 }
 
 .card-top {
@@ -121,6 +126,9 @@
 }
 
 .card-brief {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin-top: 8px;
   font-size: 22px;
   color: #6b7280;
@@ -141,39 +149,6 @@
   border: none;
 }
 
-.card-tags {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 12px;
-}
-
-.tag {
-  background: #eef2ff;
-  color: #4f6ef2;
-  font-size: 20px;
-  padding: 4px 14px;
-  border-radius: 18px;
-  margin-right: 10px;
-  margin-top: 8px;
-}
-
-/* 分级网格（RN 端不支持 Grid，忽略媒体查询后卡片单列堆叠）
-   中屏 ≥600px：4 列 */
-@media screen and (min-width: 600px) {
-  .list-inner {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* 大屏 ≥1024px：6 列 */
-@media screen and (min-width: 1024px) {
-  .list-inner {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
 /* 列表底部状态 */
 .list-footer {
   display: flex;
@@ -185,4 +160,18 @@
 .footer-text {
   font-size: 24px;
   color: #b0b7c3;
+}
+
+/* 中屏 ≥600px：4 列 */
+@media screen and (min-width: 600px) {
+  .list-inner {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 大屏 ≥1024px：6 列 */
+@media screen and (min-width: 1024px) {
+  .list-inner {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }

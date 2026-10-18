@@ -1,36 +1,35 @@
-/* 详情页样式（750 设计稿；RN 兼容：仅类选择器） */
+/* 详情页样式（750 设计稿，构建时 px -> rem） */
 
 .detail-page {
   position: relative;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100vh;
+  min-height: 0;
   background: #f5f6f8;
-  box-sizing: border-box;
 }
 
 .detail-center {
-  justify-content: center;
+  display: flex;
+  flex: 1;
   align-items: center;
+  justify-content: center;
 }
 
 .detail-scroll {
   flex: 1;
   min-height: 0;
+  padding-bottom: calc(24px + var(--safe-bottom));
   overflow-y: auto;
-  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
 }
 
 .detail-contact-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
   display: flex;
+  flex-shrink: 0;
   flex-direction: row;
-  padding: 16px 24px calc(16px + env(safe-area-inset-bottom, 0px));
+  padding: 16px 24px calc(16px + var(--safe-bottom));
   background: #ffffff;
   border-top: 1px solid #e5e7eb;
   box-sizing: border-box;
@@ -80,20 +79,24 @@
 }
 
 .profile-avatar {
+  flex-shrink: 0;
   width: 128px;
   height: 128px;
   border-radius: 64px;
   background: #e5e7eb;
+  object-fit: cover;
 }
 
 .profile-info {
   flex: 1;
+  min-width: 0;
   margin-left: 24px;
 }
 
 .profile-top {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -109,23 +112,6 @@
   align-items: center;
 }
 
-.badge {
-  margin-left: 16px;
-  padding: 2px 14px;
-  border-radius: 16px;
-  font-size: 20px;
-}
-
-.badge-female {
-  background: #fdeef2;
-  color: #e05f81;
-}
-
-.badge-male {
-  background: #e8f0fe;
-  color: #4a7de0;
-}
-
 .profile-age {
   margin-right: 12px;
   font-size: 24px;
@@ -139,15 +125,9 @@
 }
 
 .profile-meta {
+  display: block;
   font-size: 26px;
   color: #6b7280;
-}
-
-.profile-intro {
-  margin-top: 24px;
-  font-size: 26px;
-  line-height: 40px;
-  color: #4b5563;
 }
 
 .profile-facts {
@@ -175,10 +155,6 @@
   align-items: center;
 }
 
-.profile-fact-label {
-  margin-left: 24px;
-}
-
 .profile-fact-value {
   color: #d4237a;
 }
@@ -203,21 +179,22 @@
   font-size: 28px;
 }
 
-.profile-review-link {
-  margin-left: 20px;
-  color: #d4237a;
-  text-decoration: underline;
-}
-
 .profile-reviews {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
 }
 
+.profile-review-label {
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+
 .profile-review-list {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  min-width: 0;
 }
 
 .profile-review-item {
@@ -226,6 +203,15 @@
   margin-left: 0;
 }
 
+.profile-review-link {
+  flex-shrink: 0;
+  margin-left: 20px;
+  color: #d4237a;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* 优惠活动模块 */
 .activity-module {
   margin-top: 28px;
   padding: 24px;
@@ -265,6 +251,7 @@
   font-size: 22px;
 }
 
+/* 浮层弹窗（联系站长 / 立即联系） */
 .shipping-rule-overlay {
   position: fixed;
   top: 0;
@@ -276,8 +263,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  height: 100vh;
   padding: 48px;
   background: rgba(0, 0, 0, 0.45);
 }
@@ -334,8 +319,8 @@
   margin-top: 24px;
   color: #1f2937;
   font-size: 28px;
-  line-height: 44px;
   font-weight: 600;
+  line-height: 44px;
   text-align: center;
 }
 
@@ -379,6 +364,7 @@
 
 .shipping-rule-confirm {
   display: block;
+  width: 100%;
   margin-top: 28px;
   padding-top: 20px;
   border-top: 1px solid #e5e7eb;
@@ -387,18 +373,12 @@
   text-align: center;
 }
 
+/* 媒体区 */
 .section {
   background: #ffffff;
   border-radius: 24px;
   padding: 32px;
   margin: 24px 24px 0;
-}
-
-.section-title {
-  font-size: 30px;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 20px;
 }
 
 .media-section {
@@ -418,8 +398,8 @@
   z-index: 3;
   display: flex;
   align-items: center;
-  padding: 6px;
   width: 212px;
+  padding: 6px;
   border-radius: 999px;
   background: rgba(17, 24, 39, 0.38);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
@@ -437,6 +417,10 @@
   transition: transform 0.36s cubic-bezier(0.68, -0.35, 0.27, 1.35);
 }
 
+.media-tab-indicator-right {
+  transform: translateX(100%);
+}
+
 .media-tab {
   position: relative;
   z-index: 1;
@@ -446,8 +430,8 @@
   justify-content: center;
   height: 62px;
   border-radius: 999px;
-  font-size: 24px;
   color: rgba(255, 255, 255, 0.88);
+  font-size: 24px;
   transition: color 0.24s ease;
 }
 
@@ -456,18 +440,11 @@
   font-weight: bold;
 }
 
-.media-swiper {
-  position: relative;
-  width: 100%;
-  height: 560px;
-  overflow: hidden;
-  border-radius: 16px;
-  background: #f3f4f6;
-}
-
 .photo-img {
   width: 100%;
-  height: 560px;
+  height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
 }
 
 .media-photo-slide {
@@ -517,19 +494,20 @@
   height: 560px;
   border-radius: 16px;
   background: #f9fafb;
-  font-size: 26px;
   color: #9ca3af;
+  font-size: 26px;
 }
 
 .video-player {
   width: 100%;
-  height: 560px;
+  height: 100%;
   background: #000000;
+  object-fit: contain;
 }
 
 /* 底部留白（适配安全区/大屏） */
 .detail-bottom-space {
-  height: 60px;
+  height: 24px;
 }
 
 /* 中屏/大屏：卡片限宽居中，避免在加宽容器里被拉伸 */
@@ -539,5 +517,35 @@
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+  }
+}
+
+/* ---------------------------------------------------------------
+ * fixed 布局（详情页）：
+ * 顶栏脱离文档流并固定在视口顶部，页面内容随文档滚动；
+ * 底部联系栏固定在视口底部，内容用 padding 让出上下空间。
+ * ------------------------------------------------------------- */
+.app-shell[data-layout='fixed'] {
+  .detail-page {
+    display: block;
+    flex: none;
+    min-height: 100vh;
+    padding-top: var(--app-header-height);
+    padding-bottom: var(--app-contact-height);
+  }
+
+  .detail-scroll {
+    flex: none;
+    min-height: 0;
+    padding-bottom: 0;
+    overflow: visible;
+  }
+
+  .detail-contact-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
   }
 }

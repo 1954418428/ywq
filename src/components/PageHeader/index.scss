@@ -1,0 +1,41 @@
+.app-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--app-header-height);
+  padding-top: var(--safe-top);
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.app-header-title {
+  margin: 0;
+  color: #1f2937;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.app-header-back {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 80px;
+  color: #1f2937;
+}
+
+.app-header-back-icon {
+  width: 22px;
+  height: 22px;
+  border-bottom: 3px solid currentColor;
+  border-left: 3px solid currentColor;
+  transform: rotate(45deg);
+}

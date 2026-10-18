@@ -1,11 +1,22 @@
 /**
- * 本地数据服务（纯前端版本）
- * 人员和活动数据从 Supabase 聚合 JSON 加载。
+ * 数据服务（纯前端版本）
+ *
+ * 默认使用随构建打包的本地快照（src/data/yyq.json），不发起网络请求：
+ * 原来的 Supabase 签名地址在部分网络环境下 TLS 会被重置（ERR_CONNECTION_RESET），
+ * 导致列表一直是空的。
+ *
+ * 需要接远端数据时，在 index.html 的入口脚本之前注入地址：
+ *   <script>window.__YYQ_DATA_URL__ = 'https://example.com/yyq.json'</script>
+ * 远端请求失败会自动回退到本地快照，页面不会白屏。
  */
+import bundledData from '../data/yyq.json'
 import { DEFAULT_PAGE_SIZE } from '../constants'
-import Taro from '@tarojs/taro'
+import { getStorage, setStorage } from '../utils/storage'
 
-const REMOTE_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi95eXEuanNvbiIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTIyNDYxNjIsImV4cCI6MTgyMzc4MjE2Mn0.cN-K0b7TLtl0y9Gm7vvOpXNowNQuP6_jqZUXj7XDNGXiHmeHbabFFcwmFdbHdSgtFCDja7MWZxxZxuiIxlHcRg'
+const REMOTE_DATA_URL =
+  (typeof window !== 'undefined' && window.__YYQ_DATA_URL__) || ''
+
+const LOCAL_DATA = bundledData
 
 const DATA_CACHE_KEY = 'yyq-data-cache'
 const DATA_CACHE_TTL = 24 * 60 * 60 * 1000
@@ -34,38 +45,67 @@ function isValidData(data) {
 }
 
 function readCachedData() {
-  try {
-    const cached = Taro.getStorageSync(DATA_CACHE_KEY)
-    if (
-      cached &&
-      Number.isFinite(cached.fetchedAt) &&
-      cached.fetchedAt <= Date.now() &&
-      cached.version === cached.data.version &&
-      isValidData(cached.data)
-    ) {
-      return cached
-    }
-  } catch (error) {
-    console.error('Failed to read cached yyq data.', error)
+  const cached = getStorage(DATA_CACHE_KEY)
+  if (
+    cached &&
+    Number.isFinite(cached.fetchedAt) &&
+    cached.fetchedAt <= Date.now() &&
+    cached.version === cached.data?.version &&
+    isValidData(cached.data)
+  ) {
+    return cached
   }
   return null
 }
 
 function cacheData(data) {
   const fetchedAt = Date.now()
-  try {
-    Taro.setStorageSync(DATA_CACHE_KEY, {
-      version: data.version,
-      fetchedAt,
-      data
-    })
-  } catch (error) {
-    console.error('Failed to cache yyq data.', error)
+  const saved = setStorage(DATA_CACHE_KEY, {
+    version: data.version,
+    fetchedAt,
+    data
+  })
+  if (!saved) {
+    console.error('Failed to cache yyq data.')
   }
   return fetchedAt
 }
 
+async function fetchJson(url) {
+  const response = await fetch(url, {
+    method: 'GET',
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache'
+    }
+  })
+  if (!response.ok) {
+    throw new Error(`yyq data request failed: ${response.status}`)
+  }
+  return response.json()
+}
+
+/** 在数据地址上追加时间戳，避免浏览器/CDN 命中旧缓存（兼容带/不带查询参数的地址） */
+function buildDataUrl(timestamp) {
+  const url = new URL(REMOTE_DATA_URL, window.location.href)
+  url.searchParams.set('cacheBust', String(timestamp))
+  return url.toString()
+}
+
+function getLocalData() {
+  if (!isValidData(LOCAL_DATA)) {
+    throw new Error('Bundled yyq data has an invalid JSON shape')
+  }
+  return LOCAL_DATA
+}
+
 function getData() {
+  // 未配置远端地址：直接使用打包进来的快照（不产生任何数据请求）
+  if (!REMOTE_DATA_URL) {
+    return Promise.resolve(getLocalData())
+  }
+
   const now = Date.now()
   if (dataPromise && (dataFetchedAt === 0 || now - dataFetchedAt < DATA_CACHE_TTL)) {
     return dataPromise
@@ -79,20 +119,8 @@ function getData() {
   }
 
   dataFetchedAt = 0
-  dataPromise = Taro.request({
-    url: `${REMOTE_DATA_URL}&cacheBust=${now}`,
-    method: 'GET',
-    dataType: 'json',
-    header: {
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache'
-    },
-    cache: 'no-cache'
-  })
-    .then(({ data, statusCode }) => {
-      if (statusCode < 200 || statusCode >= 300) {
-        throw new Error(`yyq data request failed: ${statusCode}`)
-      }
+  dataPromise = fetchJson(buildDataUrl(now))
+    .then((data) => {
       if (!isValidData(data)) {
         throw new Error('Remote yyq data has an invalid JSON shape')
       }
@@ -102,8 +130,8 @@ function getData() {
     .catch((error) => {
       dataPromise = null
       dataFetchedAt = 0
-      console.error('Failed to load remote yyq data.', error)
-      throw error
+      console.warn('Failed to load remote yyq data, using bundled snapshot.', error)
+      return getLocalData()
     })
   return dataPromise
 }
@@ -145,7 +173,7 @@ export async function getPersonList(params = {}) {
  * 缓存 Promise 本身：并发请求去重（列表页预取与详情页自身请求共享同一个），
  * 已进入过的详情二次进入秒开；失败不缓存，下次进入自动重试
  * @param {string} id 人员 id
- * @returns {Promise<object>} 详情数据
+ * @returns {Promise<object|null>} 详情数据
  *
  * 对接后端示例：return request({ url: `/person/${id}` })
  */
@@ -153,17 +181,19 @@ const detailCache = new Map() // id -> Promise（并发/重复请求去重）
 const detailData = new Map() // id -> 已就绪数据（详情页首帧同步直出，避免 loading 闪动）
 
 export async function getPersonDetail(id) {
-  let p = detailCache.get(id)
-  if (!p) {
-    p = getData().then(({ persons }) => {
+  if (!id) return null
+
+  let promise = detailCache.get(id)
+  if (!promise) {
+    promise = getData().then(({ persons }) => {
       const person = persons.find((item) => item.id === id) || null
       if (person) detailData.set(id, person)
       return person
     })
-    detailCache.set(id, p)
-    p.catch(() => detailCache.delete(id))
+    detailCache.set(id, promise)
+    promise.catch(() => detailCache.delete(id))
   }
-  return p
+  return promise
 }
 
 /** 同步读取已就绪的详情数据；未就绪返回 null（详情页首帧直出用） */

@@ -1,0 +1,13 @@
+/* 轮播容器：高度固定，Swiper 自己处理横向切换与手势 */
+.media-carousel {
+  width: 100%;
+  height: 560px;
+  border-radius: 16px;
+  background: #f3f4f6;
+}
+
+/* 保证图片/视频能撑满每一页 */
+.media-carousel .swiper-slide {
+  height: 100%;
+  overflow: hidden;
+}

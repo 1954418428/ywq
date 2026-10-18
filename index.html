@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no,address=no" />
+    <meta name="theme-color" content="#ffffff" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23d4237a'/%3E%3C/svg%3E"
+    />
+    <title>人物展示</title>
+    <!-- 默认使用打包进来的数据快照；需要接远端数据时取消注释并填写地址 -->
+    <!-- <script>window.__YYQ_DATA_URL__ = 'https://example.com/yyq.json'</script> -->
+    <style>
+      /* 750 设计稿 -> rem 的根字号：手机按视口缩放，大屏封顶 24px */
+      html {
+        font-size: 20px;
+        font-size: clamp(20px, 5.33333vw, 24px);
+        -webkit-text-size-adjust: 100%;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: #e8ebf1;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* fixed 布局下页面会超过一屏，用 min-height 让 #root 随文档一起长高 */
+      #root {
+        min-height: 100%;
+        background: #f5f6f8;
+        box-shadow: 0 0 0.8rem rgba(31, 41, 61, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,5 +1,7 @@
 node_modules/
 dist/
+.rsbuild/
+.tmp/
 .DS_Store
 *.log
 .idea/
