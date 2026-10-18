@@ -1,28 +1,33 @@
 /**
  * 数据服务（纯前端版本）
  *
- * 默认使用随构建打包的本地快照（src/data/yyq.json），不发起网络请求：
- * 原来的 Supabase 签名地址在部分网络环境下 TLS 会被重置（ERR_CONNECTION_RESET），
- * 导致列表一直是空的。
+ * 默认从 Supabase 聚合 JSON 地址加载，成功后缓存 24 小时；
+ * 网络不可用或请求失败时自动回退到随构建打包的本地快照（src/data/yyq.json），
+ * 避免列表空白。
  *
- * 需要接远端数据时，在 index.html 的入口脚本之前注入地址：
+ * 如需临时切换数据源，在 index.html 的入口脚本之前注入：
  *   <script>window.__YYQ_DATA_URL__ = 'https://example.com/yyq.json'</script>
- * 远端请求失败会自动回退到本地快照，页面不会白屏。
  */
 import bundledData from '../data/yyq.json'
 import { DEFAULT_PAGE_SIZE } from '../constants'
 import { getStorage, setStorage } from '../utils/storage'
 
+const DEFAULT_DATA_URL = 'https://lbnegnufjgmuxvblmkxk.supabase.co/storage/v1/object/sign/yuanweiqian/yyq.json?token=eyJraWQiOiI2NTRkMjM5NS04ZTg1LTQxMWItOTFiZi1jYzIyNWNhNzE2MGUiLCJhbGciOiJIUzUxMiJ9.eyJ1cmwiOiJ5dWFud2VpcWlhbi95eXEuanNvbiIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3OTIyNDYxNjIsImV4cCI6MTgyMzc4MjE2Mn0.cN-K0b7TLtl0y9Gm7vvOpXNowNQuP6_jqZUXj7XDNGXiHmeHbabFFcwmFdbHdSgtFCDja7MWZxxZxuiIxlHcRg'
+
 const REMOTE_DATA_URL =
-  (typeof window !== 'undefined' && window.__YYQ_DATA_URL__) || ''
+  (typeof window !== 'undefined' && window.__YYQ_DATA_URL__) || DEFAULT_DATA_URL
 
 const LOCAL_DATA = bundledData
 
 const DATA_CACHE_KEY = 'yyq-data-cache'
 const DATA_CACHE_TTL = 24 * 60 * 60 * 1000
+const DATA_REQUEST_TIMEOUT = 8000
+// 远端失败后的冷却时间：避免首页/活动页同时挂载时连续重试同一个不可用地址
+const DATA_FAILURE_COOLDOWN = 60 * 1000
 
 let dataPromise
 let dataFetchedAt = 0
+let lastFailureAt = 0
 
 function isValidData(data) {
   return Boolean(
@@ -72,18 +77,24 @@ function cacheData(data) {
 }
 
 async function fetchJson(url) {
-  const response = await fetch(url, {
-    method: 'GET',
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache'
+  const controller = typeof AbortController === 'undefined' ? null : new AbortController()
+  const timer = controller
+    ? setTimeout(() => controller.abort(), DATA_REQUEST_TIMEOUT)
+    : null
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    })
+    if (!response.ok) {
+      throw new Error(`yyq data request failed: ${response.status}`)
     }
-  })
-  if (!response.ok) {
-    throw new Error(`yyq data request failed: ${response.status}`)
+    return response.json()
+  } finally {
+    if (timer) clearTimeout(timer)
   }
-  return response.json()
 }
 
 /** 在数据地址上追加时间戳，避免浏览器/CDN 命中旧缓存（兼容带/不带查询参数的地址） */
@@ -111,8 +122,14 @@ function getData() {
     return dataPromise
   }
 
+  // 刚失败过：冷却期内直接用本地快照，避免首页/活动页重复请求同一个不可用地址
+  if (now - lastFailureAt < DATA_FAILURE_COOLDOWN) {
+    return Promise.resolve(getLocalData())
+  }
+
   const cached = readCachedData()
   if (cached && now - cached.fetchedAt < DATA_CACHE_TTL) {
+    lastFailureAt = 0
     dataFetchedAt = cached.fetchedAt
     dataPromise = Promise.resolve(cached.data)
     return dataPromise
@@ -125,11 +142,13 @@ function getData() {
         throw new Error('Remote yyq data has an invalid JSON shape')
       }
       dataFetchedAt = cacheData(data)
+      lastFailureAt = 0
       return data
     })
     .catch((error) => {
       dataPromise = null
       dataFetchedAt = 0
+      lastFailureAt = Date.now()
       console.warn('Failed to load remote yyq data, using bundled snapshot.', error)
       return getLocalData()
     })
