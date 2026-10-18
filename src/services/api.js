@@ -147,6 +147,7 @@ export async function getPersonList(params = {}) {
   const provinceId = Number(params.provinceId) || null
   const { persons } = await getData()
   const filtered = persons.filter((person) => (
+    person.isVisible === true &&
     (!keyword || person.nickname.includes(keyword)) &&
     (!provinceId || person.provinceId === provinceId)
   ))

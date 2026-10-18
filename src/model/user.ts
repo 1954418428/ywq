@@ -56,6 +56,8 @@ export interface PersonBase {
   xId: string
   /** QQ 联系方式 */
   qq: string
+  /** 是否在首页展示（true/false） */
+  isVisible: boolean
   /** 是否接受线下（true/false） */
   acceptOffline: boolean
   /** 是否接受重口（true/false） */
@@ -123,6 +125,7 @@ export const PersonModel = {
       avatar: '',
       xId: '',
       qq: '',
+      isVisible: false,
       acceptOffline: false,
       acceptHeavy: false,
       hasRechargeActivityDiscount: false,
