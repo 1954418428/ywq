@@ -16,17 +16,8 @@ export function formatDuration(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-/** 复制文本（优先 Clipboard API，降级 execCommand），返回是否成功 */
-export async function copyText(text) {
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text)
-      return true
-    }
-  } catch (error) {
-    // 继续走降级方案
-  }
-
+/** 同步复制（execCommand），用于“先复制再跳转”且需要保留用户手势的场景 */
+export function copyTextSync(text) {
   try {
     const textarea = document.createElement('textarea')
     textarea.value = text
@@ -43,4 +34,18 @@ export async function copyText(text) {
     console.error('Failed to copy text.', error)
     return false
   }
+}
+
+/** 复制文本（优先 Clipboard API，降级 execCommand），返回是否成功 */
+export async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch (error) {
+    // 继续走降级方案
+  }
+
+  return copyTextSync(text)
 }

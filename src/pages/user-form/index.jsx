@@ -53,10 +53,12 @@ const createInitialForm = () => {
     xId: '',
     qq: '',
     acceptOffline: true,
+    acceptHeavy: false,
     hasRechargeActivityDiscount: true,
     freeShipping: true,
     socksFirstOrderMinPrice: 0,
     underwearFirstOrderMinPrice: 0,
+    pantiesFirstOrderMinPrice: 0,
     job: '',
     reviewLinks: [],
     photos: createPhotoModels(),
@@ -114,7 +116,9 @@ export default function UserFormPage() {
       shoeSize: Number(form.shoeSize) || 0,
       socksFirstOrderMinPrice: Number(form.socksFirstOrderMinPrice) || 0,
       underwearFirstOrderMinPrice: Number(form.underwearFirstOrderMinPrice) || 0,
+      pantiesFirstOrderMinPrice: Number(form.pantiesFirstOrderMinPrice) || 0,
       acceptOffline: form.acceptOffline === true,
+      acceptHeavy: form.acceptHeavy === true,
       hasRechargeActivityDiscount: form.hasRechargeActivityDiscount === true,
       freeShipping: form.freeShipping === true,
       reviewLinks: (form.reviewLinks || []).filter((item) => item.date || item.url),
@@ -317,6 +321,29 @@ export default function UserFormPage() {
 
           <div className="toggle-row">
             <div className="toggle-label-row">
+              <span className="toggle-label">接受重口</span>
+              <span
+                className="user-form-help"
+                onClick={() => setInfoModal(ACTIVITY_RULES.heavy)}
+              >
+                ?
+              </span>
+            </div>
+            <div className="boolean-options">
+              {[['是', true], ['否', false]].map(([label, value]) => (
+                <span
+                  key={label}
+                  className={`boolean-option${form.acceptHeavy === value ? ' boolean-option-active' : ''}`}
+                  onClick={() => setBooleanField('acceptHeavy', value)}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="toggle-row">
+            <div className="toggle-label-row">
               <span className="toggle-label">充值活动优惠</span>
               <span
                 className="user-form-help"
@@ -397,6 +424,27 @@ export default function UserFormPage() {
                 inputMode="numeric"
                 value={String(form.underwearFirstOrderMinPrice)}
                 onChange={updateNumberField('underwearFirstOrderMinPrice')}
+              />
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field-box">
+              <div className="field-label-row">
+                <span className="field-label">内裤首单价</span>
+                <span
+                  className="user-form-help"
+                  onClick={() => setInfoModal(ACTIVITY_RULES.firstOrderPrice)}
+                >
+                  ?
+                </span>
+              </div>
+              <input
+                className="field-input"
+                type="number"
+                inputMode="numeric"
+                value={String(form.pantiesFirstOrderMinPrice)}
+                onChange={updateNumberField('pantiesFirstOrderMinPrice')}
               />
             </div>
           </div>

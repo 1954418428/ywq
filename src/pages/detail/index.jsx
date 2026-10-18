@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ACTIVITY_RULES, PHOTO_TYPES } from '../../constants'
 import { getPersonDetail, peekPersonDetail } from '../../services/api'
-import { copyText, resolveResourceUrl } from '../../utils'
+import { copyText, copyTextSync, resolveResourceUrl } from '../../utils'
 import ImagePreview from '../../components/ImagePreview'
 import InfoModal from '../../components/InfoModal'
 import MediaCarousel from '../../components/MediaCarousel'
@@ -120,6 +120,14 @@ export default function DetailPage() {
   const currentMedia = mediaItems[mediaIndex]
   const showMedia = Boolean(currentMedia) && currentMedia.type === mediaType
   const xId = (detail.xId || '').trim().replace(/^@/, '')
+  const sellerQQ = String(detail.qq || '').trim()
+  const isMobile = typeof navigator !== 'undefined' &&
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+  const qqChatUrl = sellerQQ
+    ? isMobile
+      ? `mqqwpa://im/chat?chat_type=wpa&uin=${encodeURIComponent(sellerQQ)}&version=1&src_type=web&web_src=oicqapp.cn`
+      : `tencent://message/?uin=${encodeURIComponent(sellerQQ)}&Site=&Menu=yes`
+    : ''
   const avatarUrl = resolveResourceUrl(detail.avatar)
   const emptyMediaText = mediaItems.length === 0
     ? '暂无媒体'
@@ -141,24 +149,42 @@ export default function DetailPage() {
   }
 
   const openXProfile = () => {
-    if (xId) {
-      window.open(`https://x.com/${encodeURIComponent(xId)}`, '_blank', 'noopener,noreferrer')
+    if (!xId) {
+      toast('暂无 X 账号')
+      return
     }
+    window.open(`https://x.com/${encodeURIComponent(xId)}`, '_blank', 'noopener,noreferrer')
   }
 
   const openSiteOwnerXProfile = () => {
     window.open('https://x.com/tb_fzy333', '_blank', 'noopener,noreferrer')
   }
 
-  const copySellerQQ = async () => {
-    const succeeded = await copyText('1954418428')
-    toast(succeeded ? '已复制卖家 QQ 号' : '复制失败')
+  const copyQQAndOpen = () => {
+    if (!sellerQQ) {
+      toast('暂无 QQ 号')
+      return
+    }
+
+    // 优先同步复制：复制完成后再跳转，且不丢失唤起 App 所需的用户手势
+    if (copyTextSync(sellerQQ)) {
+      toast('已复制卖家 QQ 号')
+      window.location.href = qqChatUrl
+      return
+    }
+
+    // 同步复制不可用时走 Clipboard API，复制完成后再尝试跳转
+    copyText(sellerQQ).then((copied) => {
+      toast(copied ? '已复制卖家 QQ 号' : '复制失败')
+      window.location.href = qqChatUrl
+    })
   }
 
   const showShippingRule = () => setRuleModal(ACTIVITY_RULES.freeShipping)
   const showFirstOrderPriceRule = () => setRuleModal(ACTIVITY_RULES.firstOrderPrice)
   const showRechargeActivityRule = () => setRuleModal(ACTIVITY_RULES.recharge)
   const showOfflineRule = () => setRuleModal(ACTIVITY_RULES.offline)
+  const showHeavyRule = () => setRuleModal(ACTIVITY_RULES.heavy)
 
   return (
     <div className="detail-page">
@@ -267,6 +293,12 @@ export default function DetailPage() {
                 <span className="profile-fact-value">{detail.acceptOffline ? '是' : '否'}</span>
               </div>
             </div>
+            <div className="profile-fact profile-fact-row">
+              <span>接受重口</span>
+              <span className="profile-help" onClick={showHeavyRule}>?</span>
+              <span>：</span>
+              <span className="profile-fact-value">{detail.acceptHeavy ? '是' : '否'}</span>
+            </div>
             <div className="profile-reviews">
               <span className="profile-fact profile-review-label">测评链接：</span>
               <div className="profile-review-list">
@@ -313,6 +345,13 @@ export default function DetailPage() {
               </div>
               <div className="activity-item">
                 <div className="activity-label-row">
+                  <span className="activity-label">内裤首单价</span>
+                  <span className="profile-help" onClick={showFirstOrderPriceRule}>?</span>
+                </div>
+                <span className="profile-fact-value">¥{detail.pantiesFirstOrderMinPrice ?? 0}</span>
+              </div>
+              <div className="activity-item">
+                <div className="activity-label-row">
                   <span className="activity-label">内衣首单最低价</span>
                   <span className="profile-help" onClick={showFirstOrderPriceRule}>?</span>
                 </div>
@@ -350,7 +389,9 @@ export default function DetailPage() {
           >
             <span className="shipping-rule-title">立即联系</span>
             <span className="quick-contact-display">
-              {detail.nickname} @ {xId || 'unknown'} & @tb_fzy333
+              {detail.nickname}
+              {xId ? ` @ ${xId}` : ''}
+              {sellerQQ ? ` · QQ ${sellerQQ}` : ''}
             </span>
             <span className="quick-contact-tip">
               截图保存当前页面，发送给卖家，即可免门槛咨询和享受所有优惠
@@ -359,14 +400,14 @@ export default function DetailPage() {
               <button
                 type="button"
                 className="quick-contact-action quick-contact-copy"
-                onClick={copySellerQQ}
+                onClick={copyQQAndOpen}
               >
-                复制卖家qq号
+                复制QQ并打开
               </button>
               <button
                 type="button"
                 className="quick-contact-action quick-contact-open"
-                onClick={openSiteOwnerXProfile}
+                onClick={openXProfile}
               >
                 进入卖家x主页
               </button>

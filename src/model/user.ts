@@ -58,6 +58,8 @@ export interface PersonBase {
   qq: string
   /** 是否接受线下（true/false） */
   acceptOffline: boolean
+  /** 是否接受重口（true/false） */
+  acceptHeavy: boolean
   /** 充值活动是否有优惠（true/false） */
   hasRechargeActivityDiscount: boolean
   /** 是否复购运费减免（true/false） */
@@ -66,6 +68,8 @@ export interface PersonBase {
   socksFirstOrderMinPrice: number
   /** 内衣首单最低价（单位：元） */
   underwearFirstOrderMinPrice: number
+  /** 内裤首单价（单位：元） */
+  pantiesFirstOrderMinPrice: number
   /** 创建时间 */
   createdTime: string
   /** 更新时间 */
@@ -120,10 +124,12 @@ export const PersonModel = {
       xId: '',
       qq: '',
       acceptOffline: false,
+      acceptHeavy: false,
       hasRechargeActivityDiscount: false,
       freeShipping: true,
       socksFirstOrderMinPrice: 0,
       underwearFirstOrderMinPrice: 0,
+      pantiesFirstOrderMinPrice: 0,
       createdTime: '',
       updateTime: '',
       job: '',
