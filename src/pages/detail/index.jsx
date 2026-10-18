@@ -6,6 +6,7 @@ import { copyText, copyTextSync, resolveResourceUrl } from '../../utils'
 import ImagePreview from '../../components/ImagePreview'
 import InfoModal from '../../components/InfoModal'
 import MediaCarousel from '../../components/MediaCarousel'
+import MediaWatermark from '../../components/MediaWatermark'
 import PageHeader from '../../components/PageHeader'
 import { toast } from '../../components/Toast'
 import './index.scss'
@@ -77,6 +78,17 @@ export default function DetailPage() {
   }, [detail?.nickname])
 
   useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault()
+        toast('页面内容不支持保存')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
     if (!detail) return
     setVideoIndex(0)
     setPhotoIndex(0)
@@ -116,7 +128,11 @@ export default function DetailPage() {
     .filter(hasSrc)
     .sort((a, b) => a.sort - b.sort)
     .map((video) => ({ ...video, url: resolveResourceUrl(video.src) }))
+  const reviewLinks = (detail.reviewLinks || []).filter(
+    (review) => String(review?.url || '').trim()
+  )
   const xId = (detail.xId || '').trim().replace(/^@/, '')
+  const watermarkText = xId ? `@${xId}` : ''
   const sellerQQ = String(detail.qq || '').trim()
   const isMobile = typeof navigator !== 'undefined' &&
     /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
@@ -222,7 +238,11 @@ export default function DetailPage() {
             </button>
           </div>
 
-          <div className="media-stage">
+          <div
+            className="media-stage"
+            onContextMenu={(event) => event.preventDefault()}
+            onDragStart={(event) => event.preventDefault()}
+          >
             {mediaType === 'video' ? (
               videos.length > 0 ? (
                 <MediaCarousel
@@ -232,13 +252,16 @@ export default function DetailPage() {
                   onChange={setVideoIndex}
                   onEdgeNext={photos.length > 0 ? handleVideoEdgeNext : undefined}
                   renderItem={(video) => (
-                    <video
-                      className="video-player"
-                      src={video.url}
-                      controls
-                      playsInline
-                      preload="metadata"
-                    />
+                    <div className="media-video-slide">
+                      <video
+                        className="video-player"
+                        src={video.url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                      />
+                      <MediaWatermark text={watermarkText} />
+                    </div>
                   )}
                 />
               ) : (
@@ -254,13 +277,18 @@ export default function DetailPage() {
                 onChange={setPhotoIndex}
                 onEdgePrev={videos.length > 0 ? handlePhotoEdgePrev : undefined}
                 renderItem={(photo, itemIndex) => (
-                  <div className="media-photo-slide">
+                  <div
+                    className="media-photo-slide"
+                    onClick={() => setPreviewIndex(itemIndex)}
+                  >
                     <img
                       className="photo-img"
                       src={photo.url}
                       alt={photo.label || '照片'}
-                      onClick={() => setPreviewIndex(itemIndex)}
+                      draggable={false}
+                      onDragStart={(event) => event.preventDefault()}
                     />
+                    <MediaWatermark text={watermarkText} />
                     {photo.label ? (
                       <span className="photo-type-badge">{photo.label}</span>
                     ) : null}
@@ -282,12 +310,18 @@ export default function DetailPage() {
 
         {/* 基本信息 */}
         <div className="profile-card">
-          <div className="profile-head" onClick={openXProfile}>
+          <div
+            className="profile-head"
+            onClick={openXProfile}
+            onContextMenu={(event) => event.preventDefault()}
+          >
             {avatarUrl ? (
               <img
                 className="profile-avatar"
                 src={avatarUrl}
                 alt={detail.nickname}
+                draggable={false}
+                onDragStart={(event) => event.preventDefault()}
               />
             ) : (
               <div className="profile-avatar" aria-hidden="true" />
@@ -324,24 +358,26 @@ export default function DetailPage() {
               <span>：</span>
               <span className="profile-fact-value">{detail.acceptHeavy ? '是' : '否'}</span>
             </div>
-            <div className="profile-reviews">
-              <span className="profile-fact profile-review-label">测评链接：</span>
-              <div className="profile-review-list">
-                {(detail.reviewLinks || []).map((review, index) => (
-                  <div className="profile-fact profile-fact-row profile-review-item" key={`${review.date}-${index}`}>
-                    <span className="ellipsis">{review.date}</span>
-                    <span
-                      className="profile-review-link ellipsis"
-                      onClick={() => {
-                        window.open(review.url, '_blank', 'noopener,noreferrer')
-                      }}
-                    >
-                      查看详情
-                    </span>
-                  </div>
-                ))}
+            {reviewLinks.length > 0 ? (
+              <div className="profile-reviews">
+                <span className="profile-fact profile-review-label">测评链接：</span>
+                <div className="profile-review-list">
+                  {reviewLinks.map((review, index) => (
+                    <div className="profile-fact profile-fact-row profile-review-item" key={`${review.date}-${index}`}>
+                      <span className="ellipsis">{review.date}</span>
+                      <span
+                        className="profile-review-link ellipsis"
+                        onClick={() => {
+                          window.open(review.url, '_blank', 'noopener,noreferrer')
+                        }}
+                      >
+                        查看详情
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
 
           <div className="activity-module">
@@ -477,6 +513,7 @@ export default function DetailPage() {
           index={previewIndex}
           onChange={setPreviewIndex}
           onClose={() => setPreviewIndex(-1)}
+          watermarkText={watermarkText}
         />
       ) : null}
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import MediaWatermark from '../MediaWatermark'
 import './index.scss'
 
 /**
@@ -9,8 +10,9 @@ import './index.scss'
  * @param {number} props.index 当前索引，-1 表示关闭
  * @param {(index: number) => void} props.onChange
  * @param {() => void} props.onClose
+ * @param {string} [props.watermarkText] 预览水印文本
  */
-export default function ImagePreview({ images, index, onChange, onClose }) {
+export default function ImagePreview({ images, index, onChange, onClose, watermarkText = '' }) {
   const touchStartX = useRef(0)
 
   useEffect(() => {
@@ -40,14 +42,29 @@ export default function ImagePreview({ images, index, onChange, onClose }) {
   }
 
   return (
-    <div className="image-preview" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="image-preview"
+      onClick={onClose}
+      onContextMenu={(event) => event.preventDefault()}
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         className="image-preview-stage"
         onClick={(event) => event.stopPropagation()}
+        onContextMenu={(event) => event.preventDefault()}
+        onDragStart={(event) => event.preventDefault()}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <img className="image-preview-image" src={images[safeIndex]} alt="" />
+        <img
+          className="image-preview-image"
+          src={images[safeIndex]}
+          alt=""
+          draggable={false}
+          onDragStart={(event) => event.preventDefault()}
+        />
+        <MediaWatermark text={watermarkText} />
         <button
           type="button"
           className="image-preview-close"

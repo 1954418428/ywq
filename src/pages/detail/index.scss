@@ -85,6 +85,10 @@
   border-radius: 64px;
   background: #e5e7eb;
   object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
 }
 
 .profile-info {
@@ -104,12 +108,18 @@
   font-size: 38px;
   font-weight: bold;
   color: #1f2937;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 3px;
+  line-height: calc(1.2em + 3px);
+  overflow-wrap: anywhere;
 }
 
 .profile-name-row {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .profile-age {
@@ -174,9 +184,10 @@
 }
 
 .profile-x {
-  margin-left: 12px;
+  margin-left: 0;
   color: #d4237a;
   font-size: 28px;
+  white-space: nowrap;
 }
 
 .profile-reviews {
@@ -390,6 +401,8 @@
 
 .media-stage {
   position: relative;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .media-tabs {
@@ -445,13 +458,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  cursor: zoom-in;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
 }
 
 .media-photo-slide {
   position: relative;
   width: 100%;
   height: 100%;
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .photo-type-badge {
@@ -504,6 +523,12 @@
   height: 100%;
   background: #000000;
   object-fit: contain;
+}
+
+.media-video-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 /* 底部留白（适配安全区/大屏） */
