@@ -3,21 +3,36 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import './index.scss'
 
+const EDGE_SWIPE_THRESHOLD = 30
+
 /**
  * 媒体轮播：Swiper 的 React 组件（swiper/react）。
  *
  * - 手势滑动、惯性、边界回弹由 Swiper 处理；
- * - 外部通过 index 控制当前页（切换视频/照片 tab、点 tab 回第一张）；
- * - 滑动结束后通过 onSlideChange 回传当前页。
+ * - 外部通过 index 控制当前页；
+ * - 滑动结束后通过 onSlideChange 回传当前页；
+ * - 在最后一页继续向左滑触发 onEdgeNext，在第一页继续向右滑触发 onEdgePrev。
  *
  * @param {object} props
  * @param {Array} props.items
  * @param {number} props.index
  * @param {(index: number) => void} props.onChange
  * @param {(item: any, index: number) => import('react').ReactNode} props.renderItem
+ * @param {() => void} [props.onEdgeNext]
+ * @param {() => void} [props.onEdgePrev]
  */
-export default function MediaCarousel({ items, index, onChange, renderItem }) {
+export default function MediaCarousel({
+  items,
+  index,
+  onChange,
+  renderItem,
+  onEdgeNext,
+  onEdgePrev
+}) {
   const swiperRef = useRef(null)
+  const callbacksRef = useRef({ onChange, onEdgeNext, onEdgePrev })
+  const touchRef = useRef({ startX: null, fromStart: false, fromEnd: false })
+  callbacksRef.current = { onChange, onEdgeNext, onEdgePrev }
 
   // 外部 index 变化时驱动 Swiper 切页；滑动产生的 index 变化不会再触发重复切页
   useEffect(() => {
@@ -27,6 +42,33 @@ export default function MediaCarousel({ items, index, onChange, renderItem }) {
       swiper.slideTo(index)
     }
   }, [index])
+
+  const handleTouchStart = (swiper, event) => {
+    const touch = event?.touches?.[0] || event
+    touchRef.current.startX =
+      typeof touch?.clientX === 'number' ? touch.clientX : null
+    // 只有已经在第一页/最后一页时，才把这次滑动当作“继续滑出边界”
+    touchRef.current.fromStart =
+      Boolean(callbacksRef.current.onEdgePrev) && Boolean(swiper.isBeginning)
+    touchRef.current.fromEnd =
+      Boolean(callbacksRef.current.onEdgeNext) && Boolean(swiper.isEnd)
+  }
+
+  const handleTouchEnd = (swiper, event) => {
+    const touch = event?.changedTouches?.[0] || event?.touches?.[0] || event
+    const endX = typeof touch?.clientX === 'number' ? touch.clientX : null
+    const { startX, fromStart, fromEnd } = touchRef.current
+
+    touchRef.current = { startX: null, fromStart: false, fromEnd: false }
+    if (startX == null || endX == null) return
+
+    const delta = endX - startX
+    if (fromEnd && delta < -EDGE_SWIPE_THRESHOLD) {
+      callbacksRef.current.onEdgeNext?.()
+    } else if (fromStart && delta > EDGE_SWIPE_THRESHOLD) {
+      callbacksRef.current.onEdgePrev?.()
+    }
+  }
 
   return (
     <Swiper
@@ -42,8 +84,10 @@ export default function MediaCarousel({ items, index, onChange, renderItem }) {
         swiperRef.current = swiper
       }}
       onSlideChange={(swiper) => {
-        onChange(swiper.activeIndex)
+        callbacksRef.current.onChange?.(swiper.activeIndex)
       }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {items.map((item, itemIndex) => (
         <SwiperSlide key={itemIndex}>{renderItem(item, itemIndex)}</SwiperSlide>

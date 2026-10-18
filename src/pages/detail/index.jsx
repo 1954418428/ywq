@@ -30,7 +30,8 @@ export default function DetailPage() {
   const [detail, setDetail] = useState(cachedDetail)
   const [loading, setLoading] = useState(!cachedDetail)
   const [mediaType, setMediaType] = useState(() => getInitialMediaType(cachedDetail))
-  const [mediaIndex, setMediaIndex] = useState(0)
+  const [videoIndex, setVideoIndex] = useState(0)
+  const [photoIndex, setPhotoIndex] = useState(0)
   const [previewIndex, setPreviewIndex] = useState(-1)
   const [ruleModal, setRuleModal] = useState(null)
   const [showSiteContact, setShowSiteContact] = useState(false)
@@ -53,7 +54,8 @@ export default function DetailPage() {
         setDetail(result)
         // 与 detail 同一批更新，避免媒体 tab 先按默认值渲染一帧
         setMediaType(getInitialMediaType(result))
-        setMediaIndex(0)
+        setVideoIndex(0)
+        setPhotoIndex(0)
       })
       .catch((error) => {
         if (!cancelled) toast(error.message || '加载失败')
@@ -76,7 +78,8 @@ export default function DetailPage() {
 
   useEffect(() => {
     if (!detail) return
-    setMediaIndex(0)
+    setVideoIndex(0)
+    setPhotoIndex(0)
     setMediaType(getInitialMediaType(detail))
   }, [detail?.id])
 
@@ -113,12 +116,6 @@ export default function DetailPage() {
     .filter(hasSrc)
     .sort((a, b) => a.sort - b.sort)
     .map((video) => ({ ...video, url: resolveResourceUrl(video.src) }))
-  const mediaItems = [
-    ...videos.map((item) => ({ type: 'video', item })),
-    ...photos.map((item, photoIndex) => ({ type: 'photo', item, photoIndex }))
-  ]
-  const currentMedia = mediaItems[mediaIndex]
-  const showMedia = Boolean(currentMedia) && currentMedia.type === mediaType
   const xId = (detail.xId || '').trim().replace(/^@/, '')
   const sellerQQ = String(detail.qq || '').trim()
   const isMobile = typeof navigator !== 'undefined' &&
@@ -129,23 +126,36 @@ export default function DetailPage() {
       : `tencent://message/?uin=${encodeURIComponent(sellerQQ)}&Site=&Menu=yes`
     : ''
   const avatarUrl = resolveResourceUrl(detail.avatar)
-  const emptyMediaText = mediaItems.length === 0
-    ? '暂无媒体'
-    : mediaType === 'video'
-      ? '暂无视频'
-      : '暂无照片'
   const imageUrls = photos.map((photo) => photo.url)
 
-  const switchMediaType = (type) => {
-    const targetIndex = mediaItems.findIndex((media) => media.type === type)
-    setMediaType(type)
-    if (targetIndex >= 0) setMediaIndex(targetIndex)
+  const pauseCurrentVideo = () => {
+    document.querySelectorAll('.video-player').forEach((video) => video.pause())
   }
 
-  const handleMediaChange = (nextIndex) => {
-    const media = mediaItems[nextIndex]
-    setMediaIndex(nextIndex)
-    if (media) setMediaType(media.type)
+  const switchMediaType = (type) => {
+    // 视频切到照片前先暂停，避免转场后还在播放
+    if (type === 'photo' && mediaType === 'video') {
+      pauseCurrentVideo()
+    }
+    setMediaType(type)
+    if (type === 'video') {
+      setVideoIndex(0)
+    } else {
+      setPhotoIndex(0)
+    }
+  }
+
+  // 视频最后一页继续左滑：暂停并切到照片第一页
+  const handleVideoEdgeNext = () => {
+    pauseCurrentVideo()
+    setPhotoIndex(0)
+    setMediaType('photo')
+  }
+
+  // 照片第一页继续右滑：切到视频最后一页
+  const handlePhotoEdgePrev = () => {
+    setVideoIndex(Math.max(0, videos.length - 1))
+    setMediaType('video')
   }
 
   const openXProfile = () => {
@@ -213,43 +223,58 @@ export default function DetailPage() {
           </div>
 
           <div className="media-stage">
-            {showMedia ? (
-              <MediaCarousel
-                items={mediaItems}
-                index={mediaIndex}
-                onChange={handleMediaChange}
-                renderItem={(media) =>
-                  media.type === 'video' ? (
+            {mediaType === 'video' ? (
+              videos.length > 0 ? (
+                <MediaCarousel
+                  key="video"
+                  items={videos}
+                  index={videoIndex}
+                  onChange={setVideoIndex}
+                  onEdgeNext={photos.length > 0 ? handleVideoEdgeNext : undefined}
+                  renderItem={(video) => (
                     <video
                       className="video-player"
-                      src={media.item.url}
+                      src={video.url}
                       controls
                       playsInline
                       preload="metadata"
                     />
-                  ) : (
-                    <div className="media-photo-slide">
-                      <img
-                        className="photo-img"
-                        src={media.item.url}
-                        alt={media.item.label || '照片'}
-                        onClick={() => setPreviewIndex(media.photoIndex)}
-                      />
-                      {media.item.label ? (
-                        <span className="photo-type-badge">{media.item.label}</span>
-                      ) : null}
-                    </div>
-                  )
-                }
+                  )}
+                />
+              ) : (
+                <div className="media-empty">
+                  <span>暂无视频</span>
+                </div>
+              )
+            ) : photos.length > 0 ? (
+              <MediaCarousel
+                key="photo"
+                items={photos}
+                index={photoIndex}
+                onChange={setPhotoIndex}
+                onEdgePrev={videos.length > 0 ? handlePhotoEdgePrev : undefined}
+                renderItem={(photo, itemIndex) => (
+                  <div className="media-photo-slide">
+                    <img
+                      className="photo-img"
+                      src={photo.url}
+                      alt={photo.label || '照片'}
+                      onClick={() => setPreviewIndex(itemIndex)}
+                    />
+                    {photo.label ? (
+                      <span className="photo-type-badge">{photo.label}</span>
+                    ) : null}
+                  </div>
+                )}
               />
             ) : (
               <div className="media-empty">
-                <span>{emptyMediaText}</span>
+                <span>暂无照片</span>
               </div>
             )}
-            {currentMedia?.type === 'photo' && showMedia ? (
+            {mediaType === 'photo' && photos.length > 0 ? (
               <span className="media-counter">
-                {currentMedia.photoIndex + 1} / {photos.length}
+                {photoIndex + 1} / {photos.length}
               </span>
             ) : null}
           </div>
