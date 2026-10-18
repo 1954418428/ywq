@@ -46,15 +46,20 @@ img {
 /*
  * 安全区与底栏尺寸统一变量：
  * - --safe-bottom 用于 tabBar、详情底部按钮条等贴底元素；
+ * - --fixed-bottom-bar-padding 是底栏的固定 12px 留白（不随 750 设计稿缩放）；
  * - --app-tabbar-height / --app-contact-height 是它们的实际占用高度（含安全区）。
  * 不支持 env() 的浏览器会退回 0px。
  */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* --fixed- 前缀的变量不会被 px -> rem 插件转换 */
+  --fixed-bottom-bar-padding: 12px;
+  --fixed-hairline: 1px;
   --app-header-height: calc(80px + var(--safe-top));
   --app-tabbar-height: 100px;
-  --app-contact-height: calc(121px + var(--safe-bottom));
+  /* 详情按钮条：16px 顶部 + 88px 按钮 + 16px 原有底部内边距 + 1px 边框 + 12px 固定留白 + 安全区 */
+  --app-contact-height: calc(120px + var(--fixed-hairline) + var(--fixed-bottom-bar-padding) + var(--safe-bottom));
 }
 
 /* 应用外壳：flex 列布局的基础结构 */

@@ -98,7 +98,8 @@ http://host:10086/#/pages/user-form/index
 底部统一处理（变量定义在 [`src/app.scss`](src/app.scss) 的 `:root`）：
 
 - `--safe-bottom = env(safe-area-inset-bottom)`：tabBar、详情底部按钮条都带这个内边距，适配 iPhone 底部安全区；
-- `--app-tabbar-height` / `--app-contact-height` 是底栏实际高度（含安全区）：详情页用 `--app-contact-height` 预留 `padding-bottom`，滚到底不会被按钮条挡住；
+- `--fixed-bottom-bar-padding = 12px`（固定 px，不参与 rem 缩放）：tabBar 底部在安全区之上加 12px；详情按钮区在原有 16px 底部内边距之上再加 12px；
+- `--app-tabbar-height` / `--app-contact-height` 是底栏实际高度（含 12px 留白和安全区）：详情页用 `--app-contact-height` 预留 `padding-bottom`，滚到底不会被按钮条挡住；
 - `--app-header-height = 80px + --safe-top`，两种布局的顶栏和内容让位共用；
 - 不支持 `env()` 的浏览器变量回退为 `0px`，`viewport-fit=cover` 已在 `index.html` 的 viewport meta 中开启。
 

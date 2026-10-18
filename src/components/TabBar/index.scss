@@ -4,7 +4,7 @@
   flex-direction: row;
   background: #ffffff;
   border-top: 1px solid #e5e7eb;
-  padding-bottom: var(--safe-bottom);
+  padding-bottom: calc(var(--fixed-bottom-bar-padding) + var(--safe-bottom));
 }
 
 .app-tabbar-item {

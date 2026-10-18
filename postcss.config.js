@@ -14,6 +14,8 @@ const pxToRem = () => ({
   postcssPlugin: 'design-px-to-rem',
   Declaration(decl) {
     if (!decl.value || !decl.value.includes('px')) return
+    // 约定：--fixed- 开头的自定义属性保留 px（1:1 固定尺寸），不参与 rem 换算
+    if (decl.prop?.startsWith('--fixed-')) return
     const next = decl.value.replace(PX_RE, (match, value) => {
       const rem = Number(value) / PX_PER_REM
       return `${Number(rem.toFixed(4))}rem`
