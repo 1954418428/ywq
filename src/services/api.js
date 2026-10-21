@@ -56,6 +56,7 @@ function cacheSessionData(data) {
 }
 
 async function fetchJson(url) {
+  return getLocalData()
   const controller = typeof AbortController === 'undefined' ? null : new AbortController()
   const timer = controller
     ? setTimeout(() => controller.abort(), DATA_REQUEST_TIMEOUT)
