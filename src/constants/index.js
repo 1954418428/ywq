@@ -65,7 +65,7 @@ export const ACTIVITY_RULES = {
   },
   firstOrderPrice: {
     title: '首单价格规则',
-    content: '最低价已包含运费，首单购买袜子/内裤/内衣两件以上可打9折'
+    content: '最低价不包含运费，首单购买袜子/内裤/内衣两件以上可打9折'
   },
   heavy: {
     title: '重口说明',
